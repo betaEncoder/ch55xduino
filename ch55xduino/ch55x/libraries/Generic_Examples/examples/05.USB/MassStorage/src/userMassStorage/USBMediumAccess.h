@@ -9,13 +9,13 @@
 #define MAL_FAIL 1
 
 extern __code const uint8_t emuDisk_Inquiry_Data[];
-/*
+
 //make sure they match
 extern __code const uint8_t diskCapacity[8];
 extern __code const uint8_t formatCapacity[8];
 #define MASS_BLOCK_COUNT 0x8000
 #define MASS_BLOCK_SIZE 512
-*/
+
 uint8_t LUN_GetStatus();
 /*__code uint8_t* LUN_GetInquiryData (uint8_t lun);
 void LUN_Eject (uint8_t lun);

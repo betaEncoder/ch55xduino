@@ -204,10 +204,25 @@ void CBW_Decode(void) {
                     break;
                 case SCSI_READ_FORMAT_CAPACITIES:
                     SCSI_ReadFormatCapacity_Cmd(CBW.bLUN);
-                    break;
-                case SCSI_READ_CAPACITY10:
-                    SCSI_ReadCapacity10_Cmd(CBW.bLUN);
                     break;*/
+                case SCSI_READ_CAPACITY10:  //0x25
+                    {
+                        if (LUN_GetStatus()) {
+                            //Set_Scsi_Sense_Data
+                            SCSI_Sense_Key = NOT_READY;
+                            SCSI_Sense_Asc = MEDIUM_NOT_PRESENT;
+                            Transfer_Failed_ReadWrite();
+                            return;
+                        }
+                        
+                        // Index of the last block,
+                        for (uint8_t i=0;i<8;i++){
+                            BOT_Tx_Buf[i]=diskCapacity[i];
+                        }
+                        
+                        Reply_Request(READ_CAPACITY10_DATA_LEN);
+                    }
+                    break;
                 case SCSI_TEST_UNIT_READY:  //0x00
                     {
                         if (LUN_GetStatus()) {
