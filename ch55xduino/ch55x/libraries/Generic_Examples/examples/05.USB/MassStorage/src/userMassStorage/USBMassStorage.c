@@ -196,10 +196,12 @@ void CBW_Decode(void) {
                         }
                     }
                     break;
-                /*case SCSI_MODE_SENSE6:
-                    SCSI_ModeSense6_Cmd (CBW.bLUN);
+                case SCSI_MODE_SENSE6:  //0x1A
+                    {
+                        Transfer_Data_Request((__code uint8_t*)Mode_Sense6_data, MODE_SENSE6_DATA_LEN);
+                    }
                     break;
-                case SCSI_MODE_SENSE10:
+                /*case SCSI_MODE_SENSE10:
                     SCSI_ModeSense10_Cmd (CBW.bLUN);
                     break;
                 case SCSI_READ_FORMAT_CAPACITIES:
