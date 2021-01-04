@@ -171,11 +171,20 @@ void CBW_Decode(void) {
                     break;
                 /*case SCSI_START_STOP_UNIT:
                     SCSI_Start_Stop_Unit_Cmd(CBW.bLUN);
+                    break;*/
+                case SCSI_ALLOW_MEDIUM_REMOVAL:  //0x1E
+                    {
+                        if (CBW.CB[4] & 1) {
+                            //Set_Scsi_Sense_Data
+                            SCSI_Sense_Key = ILLEGAL_REQUEST;
+                            SCSI_Sense_Asc = INVALID_COMMAND;
+                            Set_CSW (CSW_CMD_FAILED, SEND_CSW_ENABLE);
+                        } else {
+                            Set_CSW (CSW_CMD_PASSED, SEND_CSW_ENABLE);
+                        }
+                    }
                     break;
-                case SCSI_ALLOW_MEDIUM_REMOVAL:
-                    SCSI_Allow_Medium_Removal_Cmd(CBW.bLUN);
-                    break;
-                case SCSI_MODE_SENSE6:
+                /*case SCSI_MODE_SENSE6:
                     SCSI_ModeSense6_Cmd (CBW.bLUN);
                     break;
                 case SCSI_MODE_SENSE10:
