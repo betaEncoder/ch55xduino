@@ -40,25 +40,22 @@ void Mass_Storage_In (void) {
              Bot_State = BOT_IDLE;
              // Enable the Endpoint to receive the next cmd
              BOT_EP_Rx_Valid();
-         break;
+             break;
          /*case BOT_DATA_IN:
          if (CBW.CB[0] == SCSI_READ10) {
          SCSI_Read10_Cmd();
          }
-         break;
-         case BOT_DATA_IN_LAST:
-         Set_CSW (CSW_CMD_PASSED, SEND_CSW_ENABLE);
-         // SetEPRxStatus(ENDP2, EP_RX_VALID);
-         BOT_EP_Rx_Valid();
-         break;
-         case BOT_DATA_IN_LAST_FAIL:
-         Set_CSW (CSW_CMD_FAILED, SEND_CSW_ENABLE);
-         
-         // SetEPRxStatus(ENDP2, EP_RX_VALID);
-         BOT_EP_Rx_Valid();
-         break;
-         default:
          break;*/
+         case BOT_DATA_IN_LAST:
+             Set_CSW (CSW_CMD_PASSED, SEND_CSW_ENABLE);
+             BOT_EP_Rx_Valid();
+             break;
+         case BOT_DATA_IN_LAST_FAIL:
+             Set_CSW (CSW_CMD_FAILED, SEND_CSW_ENABLE);
+             BOT_EP_Rx_Valid();
+             break;
+         default:
+             break;
      }
 }
 
@@ -78,18 +75,14 @@ void Mass_Storage_Out (void) {
                 Set_Scsi_Sense_Data(CBW.bLUN, ILLEGAL_REQUEST, INVALID_FIELED_IN_COMMAND);
                 Set_CSW (CSW_PHASE_ERROR, SEND_CSW_DISABLE);
             }
-            break;
+            break;*/
         default:
             Bot_Abort(BOTH_DIR);
-            Set_Scsi_Sense_Data(CBW.bLUN, ILLEGAL_REQUEST, INVALID_FIELED_IN_COMMAND);
-            Set_CSW (CSW_PHASE_ERROR, SEND_CSW_DISABLE);*/
-            
+            //Set_Scsi_Sense_Data
+            SCSI_Sense_Key = ILLEGAL_REQUEST;
+            SCSI_Sense_Asc = INVALID_FIELED_IN_COMMAND;
+            Set_CSW (CSW_PHASE_ERROR, SEND_CSW_DISABLE);
     } // switch (Bot_State)
-    
-    
-    
-    
-    
 }
 
 
@@ -156,11 +149,27 @@ void CBW_Decode(void) {
             switch (CBW.CB[0]) {
                 /*case SCSI_REQUEST_SENSE:
                     SCSI_RequestSense_Cmd (CBW.bLUN);
+                    break;*/
+                case SCSI_INQUIRY:  //0x12
+                    {
+                        __code uint8_t* Inquiry_Data;
+                        uint16_t Inquiry_Data_Length;
+                        
+                        if (CBW.CB[1] & 0x01) {/*Evpd is set*/
+                            Inquiry_Data = (__code uint8_t*) Page00_Inquiry_Data;
+                            Inquiry_Data_Length = PAGE00_INQUIRY_DATA_LEN;
+                        } else {
+                            Inquiry_Data = (__code uint8_t*) emuDisk_Inquiry_Data;
+                            
+                            if (CBW.CB[4] <= STANDARD_INQUIRY_DATA_LEN)
+                                Inquiry_Data_Length = CBW.CB[4];
+                            else
+                                Inquiry_Data_Length = STANDARD_INQUIRY_DATA_LEN;
+                        }
+                        Transfer_Data_Request(Inquiry_Data, Inquiry_Data_Length);
+                    }
                     break;
-                case SCSI_INQUIRY:
-                    SCSI_Inquiry_Cmd(CBW.bLUN);
-                    break;
-                case SCSI_START_STOP_UNIT:
+                /*case SCSI_START_STOP_UNIT:
                     SCSI_Start_Stop_Unit_Cmd(CBW.bLUN);
                     break;
                 case SCSI_ALLOW_MEDIUM_REMOVAL:
@@ -239,6 +248,35 @@ void USB_EP2_OUT(){
     }
 }*/
 
+
+
+void Transfer_Data_Request(__code uint8_t* Data_Pointer, __xdata uint8_t Data_Len) {
+    //Send the request response to the PC HOST.
+    dataResidue -= Data_Len;
+    
+    BOT_EP_Tx_Count(Data_Len);
+    while (Data_Len--)
+        BOT_Tx_Buf[Data_Len] = Data_Pointer[Data_Len];
+    
+    BOT_EP_Tx_Valid();    // Enable Tx
+    
+    Bot_State = BOT_DATA_IN_LAST;
+}
+
+void Reply_Request(uint8_t Data_Len) {
+    dataResidue -= Data_Len;
+    BOT_EP_Tx_Count(Data_Len);
+    BOT_EP_Tx_Valid();    // Enable Tx
+    
+    Bot_State = BOT_DATA_IN_LAST;
+}
+
+void Transfer_Failed_ReadWrite(void) {
+    BOT_EP_Tx_Count(0);    // Send an empty packet
+    BOT_EP_Tx_Valid();    // Enable Tx
+    
+    Bot_State = BOT_DATA_IN_LAST_FAIL;
+}
 
 void Set_CSW (uint8_t CSW_Status, __xdata uint8_t Send_Permission)
 {

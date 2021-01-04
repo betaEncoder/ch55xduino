@@ -3,6 +3,7 @@
 #ifndef __USB_SCSI_H
 #define __USB_SCSI_H
 
+#include <stdint.h>
 
 /* SCSI Commands */
 #define SCSI_FORMAT_UNIT                            0x04
@@ -35,20 +36,20 @@
 #define SCSI_SEND_DIAGNOSTIC                        0x1D
 #define SCSI_READ_FORMAT_CAPACITIES                 0x23
 
-#define NO_SENSE		                    0
+#define NO_SENSE                                0
 #define RECOVERED_ERROR		                    1
-#define NOT_READY		                    2
+#define NOT_READY                               2
 #define MEDIUM_ERROR		                    3
 #define HARDWARE_ERROR		                    4
 #define ILLEGAL_REQUEST		                    5
 #define UNIT_ATTENTION		                    6
 #define DATA_PROTECT		                    7
-#define BLANK_CHECK		                    8
+#define BLANK_CHECK                             8
 #define VENDOR_SPECIFIC		                    9
 #define COPY_ABORTED		                    10
 #define ABORTED_COMMAND		                    11
 #define VOLUME_OVERFLOW		                    13
-#define MISCOMPARE		                    14
+#define MISCOMPARE                              14
 
 
 #define INVALID_COMMAND                             0x20
@@ -56,8 +57,8 @@
 #define PARAMETER_LIST_LENGTH_ERROR                 0x1A
 #define INVALID_FIELD_IN_PARAMETER_LIST             0x26
 #define ADDRESS_OUT_OF_RANGE                        0x21
-#define MEDIUM_NOT_PRESENT 			    0x3A
-#define MEDIUM_HAVE_CHANGED			    0x28
+#define MEDIUM_NOT_PRESENT                          0x3A
+#define MEDIUM_HAVE_CHANGED                         0x28
 
 #define READ_FORMAT_CAPACITY_DATA_LEN               0x0C
 #define READ_CAPACITY10_DATA_LEN                    0x08
@@ -65,8 +66,13 @@
 #define MODE_SENSE6_DATA_LEN                        0x04
 #define REQUEST_SENSE_DATA_LEN                      0x12
 #define STANDARD_INQUIRY_DATA_LEN                   0x24
-#define PAGE00_INQUIRY_DATA_LEN											0x05
+#define PAGE00_INQUIRY_DATA_LEN	                    0x05
 #define BLKVFY                                      0x04
+
+extern __code const uint8_t Page00_Inquiry_Data[];
+extern __code const uint8_t Mode_Sense6_data[];
+extern __code const uint8_t Mode_Sense10_data[];
+extern __code const uint8_t Scsi_Sense_Data[];
 
 // #define SCSI_TestUnitReady_Cmd           SCSI_Valid_Cmd
 // #define SCSI_Prevent_Removal_Cmd         SCSI_Valid_Cmd

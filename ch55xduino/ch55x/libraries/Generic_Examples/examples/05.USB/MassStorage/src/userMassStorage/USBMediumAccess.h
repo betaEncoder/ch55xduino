@@ -7,6 +7,8 @@
 
 #define MAL_OK   0
 #define MAL_FAIL 1
+
+extern __code const uint8_t emuDisk_Inquiry_Data[];
 /*
 //make sure they match
 extern __code const uint8_t diskCapacity[8];

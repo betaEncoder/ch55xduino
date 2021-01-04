@@ -39,8 +39,8 @@ __code const uint8_t emuDisk_Inquiry_Data[] =
     /* Vendor Identification */
     'D', 'e', 'q', 'i', 'n', 'g', ' ', ' ',				/* Manufacturer: 8 bytes */
     /* Product Identification */
-    'S', 'p', 'e', 'e', 'd', ' ', 'D', 'e',				/* Product : 16 Bytes */
-		'm', 'o', 'n', ' ', ' ', ' ', ' ', ' ',
+    'C', 'H', '5', '5', 'x', 'd', 'u', 'i',				/* Product : 16 Bytes */
+		'n', 'o', ' ', 'M', 'S', 'D', ' ', ' ',
     /* Product Revision Level */
     '1', '.', '0', ' '														/* Version : 4 Bytes */
   };
