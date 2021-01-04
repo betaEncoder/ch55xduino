@@ -17,6 +17,12 @@ __xdata uint16_t SCSI_BlkLen;
 __xdata uint8_t SCSI_Sense_Key;  //we only has 1 logic device
 __xdata uint8_t SCSI_Sense_Asc;
 
+// SCSI R/W state machine
+#define TXFR_IDLE     0
+#define TXFR_ONGOING  1
+__xdata uint8_t TransferState = TXFR_IDLE;
+__xdata uint32_t curAddr, endAddr;
+
 //!!!
 #pragma callee_saves sendCharDebug
 void sendCharDebug(char c);
@@ -41,11 +47,11 @@ void Mass_Storage_In (void) {
              // Enable the Endpoint to receive the next cmd
              BOT_EP_Rx_Valid();
              break;
-         /*case BOT_DATA_IN:
-         if (CBW.CB[0] == SCSI_READ10) {
-         SCSI_Read10_Cmd();
-         }
-         break;*/
+         case BOT_DATA_IN:
+             if (CBW.CB[0] == SCSI_READ10) {
+                 SCSI_Read10_Cmd();
+             }
+             break;
          case BOT_DATA_IN_LAST:
              Set_CSW (CSW_CMD_PASSED, SEND_CSW_ENABLE);
              BOT_EP_Rx_Valid();
@@ -238,10 +244,10 @@ void CBW_Decode(void) {
                         }
                     }
                     break;
-                /*case SCSI_READ10:
+                case SCSI_READ10:  //0x28
                     SCSI_Read10_Cmd();
                     break;
-                case SCSI_WRITE10:
+                /*case SCSI_WRITE10:
                     SCSI_Write10_Cmd();
                     break;
                 case SCSI_VERIFY10:
@@ -268,23 +274,6 @@ void CBW_Decode(void) {
         Set_CSW (CSW_CMD_FAILED, SEND_CSW_DISABLE);
     }
 }
-
-
-
-/*void USB_EP2_IN(){
-    UEP2_T_LEN = 0;                                                    // No data to send anymore
-    UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_T_RES | UEP_T_RES_NAK;           //Respond NAK by default
-    UpPoint2_Busy = 0;                                                  //Clear busy flag
-}
-
-void USB_EP2_OUT(){
-    if ( U_TOG_OK )                                                     // Discard unsynchronized packets
-    {
-        USBByteCountEP2 = USB_RX_LEN;
-        USBBufOutPointEP2 = 0;                                             //Reset Data pointer for fetching
-        if (USBByteCountEP2)    UEP2_CTRL = UEP2_CTRL & ~ MASK_UEP_R_RES | UEP_R_RES_NAK;       //Respond NAK after a packet. Let main code change response after handling.
-    }
-}*/
 
 
 
@@ -372,3 +361,97 @@ void Bot_Abort(uint8_t Direction) {
             break;
     }
 }
+
+
+//~~~~~~~~
+
+// SCSI Read and Write commands
+void SCSI_Read10_Cmd() { //Global_LBA_BlockNbr
+    uint8_t lun = CBW.bLUN;
+    if (Bot_State == BOT_IDLE) {
+        if (LUN_GetStatus()) {
+            //Set_Scsi_Sense_Data
+            SCSI_Sense_Key = NOT_READY;
+            SCSI_Sense_Asc = MEDIUM_NOT_PRESENT;
+            Transfer_Failed_ReadWrite();
+            return;
+        }
+        
+        if (!SCSI_Address_Management(SCSI_READ10))
+            return;    // Address out of range
+        
+        if ((CBW.bmFlags & 0x80) != 0) {
+            Bot_State = BOT_DATA_IN;
+        } else {
+            Bot_Abort(BOTH_DIR);
+            //Set_Scsi_Sense_Data
+            SCSI_Sense_Key = ILLEGAL_REQUEST;
+            SCSI_Sense_Asc = INVALID_FIELED_IN_COMMAND;
+            Set_CSW (CSW_CMD_FAILED, SEND_CSW_ENABLE);
+            return;
+        }
+    }
+    
+    if (Bot_State == BOT_DATA_IN) {
+        if (TransferState == TXFR_IDLE ) {
+            curAddr = SCSI_LBA * MASS_BLOCK_SIZE;
+            endAddr = curAddr + SCSI_BlkLen * MASS_BLOCK_SIZE;
+            TransferState = TXFR_ONGOING;
+        }
+        
+        if (TransferState == TXFR_ONGOING ) {
+            //!!!!            RW_LED_ON();
+            
+            //!!!!!!!!LUN_Read(curAddr);  //use global lun
+            //TEST ONLY!!!!!
+            for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+                BOT_Tx_Buf[i] = i;
+            }
+            //!!!!!!
+            
+            curAddr += BULK_MAX_PACKET_SIZE;
+            dataResidue -= BULK_MAX_PACKET_SIZE;
+            
+            BOT_EP_Tx_Count(BULK_MAX_PACKET_SIZE);
+            BOT_EP_Tx_Valid();    // Enable Tx
+            
+            if (curAddr >= endAddr) {
+                //!!!!                RW_LED_OFF();
+                curAddr = 0;
+                endAddr = 0;
+                Bot_State = BOT_DATA_IN_LAST;
+                TransferState = TXFR_IDLE;
+            }
+        } // if (TransferState == TXFR_ONGOING )
+    } // if (Bot_State == BOT_DATA_IN)
+}
+
+uint8_t SCSI_Address_Management(uint8_t Cmd) {
+    if ((SCSI_LBA + SCSI_BlkLen) > MASS_BLOCK_COUNT) {
+        if (Cmd == SCSI_WRITE10) {
+            Bot_Abort(BOTH_DIR);
+        }
+        Bot_Abort(DIR_IN);
+        //Set_Scsi_Sense_Data
+        SCSI_Sense_Key = ILLEGAL_REQUEST;
+        SCSI_Sense_Asc = ADDRESS_OUT_OF_RANGE;
+        Set_CSW (CSW_CMD_FAILED, SEND_CSW_DISABLE);
+        return 0;
+    }
+    
+    if (CBW.dDataLength != SCSI_BlkLen * MASS_BLOCK_SIZE) {
+        if (Cmd == SCSI_WRITE10) {
+            Bot_Abort(BOTH_DIR);
+        } else {
+            Bot_Abort(DIR_IN);
+        }
+        //Set_Scsi_Sense_Data
+        SCSI_Sense_Key = ILLEGAL_REQUEST;
+        SCSI_Sense_Asc = INVALID_FIELED_IN_COMMAND;
+        Set_CSW (CSW_CMD_FAILED, SEND_CSW_DISABLE);
+        return 0;
+    }
+    return 1;
+}
+
+

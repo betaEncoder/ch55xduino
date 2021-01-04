@@ -135,6 +135,9 @@ void Transfer_Failed_ReadWrite(void);
 void Set_CSW (uint8_t CSW_Status, __xdata uint8_t Send_Permission);
 void Bot_Abort(uint8_t Direction);
 
+void SCSI_Read10_Cmd();
+uint8_t SCSI_Address_Management(uint8_t Cmd);
+
 
 #endif
 
