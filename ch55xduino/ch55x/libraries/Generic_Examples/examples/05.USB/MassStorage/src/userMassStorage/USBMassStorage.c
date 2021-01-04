@@ -187,9 +187,15 @@ void CBW_Decode(void) {
                         Transfer_Data_Request(Inquiry_Data, Inquiry_Data_Length);
                     }
                     break;
-                /*case SCSI_START_STOP_UNIT:  //0x1B
-                    SCSI_Start_Stop_Unit_Cmd(CBW.bLUN);
-                    break;*/
+                case SCSI_START_STOP_UNIT:  //0x1B
+                    {
+                        // Removable device ejection
+                        Set_CSW (CSW_CMD_PASSED, SEND_CSW_ENABLE);
+                        
+                        if ((CBW.CB[4] & 3) == 2)    // LOEJ = 1 and Start = 0
+                            LUN_Eject();
+                    }
+                    break;
                 case SCSI_ALLOW_MEDIUM_REMOVAL:  //0x1E
                     {
                         if (CBW.CB[4] & 1) {
@@ -207,9 +213,11 @@ void CBW_Decode(void) {
                         Transfer_Data_Request((__code uint8_t*)Mode_Sense6_data, MODE_SENSE6_DATA_LEN);
                     }
                     break;
-                /*case SCSI_MODE_SENSE10:  //0x5A
-                    SCSI_ModeSense10_Cmd (CBW.bLUN);
-                    break;*/
+                case SCSI_MODE_SENSE10:  //0x5A
+                    {
+                        Transfer_Data_Request((__code uint8_t*)Mode_Sense10_data, MODE_SENSE10_DATA_LEN);
+                    }
+                    break;
                 case SCSI_READ_FORMAT_CAPACITIES:  //0x23
                     do{
                         if (LUN_GetStatus() != 0 ) {
@@ -271,10 +279,21 @@ void CBW_Decode(void) {
                     break;
                 case SCSI_VERIFY10:  //0x2F
                     SCSI_Verify10_Cmd(CBW.bLUN);
-                    break;
-                case SCSI_FORMAT_UNIT:  //0x04
-                    SCSI_Format_Cmd(CBW.bLUN);
                     break;*/
+                case SCSI_FORMAT_UNIT:  //0x04
+                    {
+                        if (LUN_GetStatus()) {
+                            //Set_Scsi_Sense_Data
+                            SCSI_Sense_Key = NOT_READY;
+                            SCSI_Sense_Asc = MEDIUM_NOT_PRESENT;
+                            Set_CSW (CSW_CMD_FAILED, SEND_CSW_ENABLE);
+                            Bot_Abort(DIR_IN);
+                        }else{
+                            //nothing to format....
+                            Set_CSW (CSW_CMD_PASSED, SEND_CSW_ENABLE);
+                        }
+                    }
+                    break;
                     
                 default:
                     Bot_Abort(BOTH_DIR);
