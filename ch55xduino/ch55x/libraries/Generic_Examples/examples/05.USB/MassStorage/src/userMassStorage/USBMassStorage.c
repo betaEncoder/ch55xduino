@@ -187,7 +187,7 @@ void CBW_Decode(void) {
                         Transfer_Data_Request(Inquiry_Data, Inquiry_Data_Length);
                     }
                     break;
-                /*case SCSI_START_STOP_UNIT:
+                /*case SCSI_START_STOP_UNIT:  //0x1B
                     SCSI_Start_Stop_Unit_Cmd(CBW.bLUN);
                     break;*/
                 case SCSI_ALLOW_MEDIUM_REMOVAL:  //0x1E
@@ -207,7 +207,7 @@ void CBW_Decode(void) {
                         Transfer_Data_Request((__code uint8_t*)Mode_Sense6_data, MODE_SENSE6_DATA_LEN);
                     }
                     break;
-                /*case SCSI_MODE_SENSE10:
+                /*case SCSI_MODE_SENSE10:  //0x5A
                     SCSI_ModeSense10_Cmd (CBW.bLUN);
                     break;*/
                 case SCSI_READ_FORMAT_CAPACITIES:  //0x23
@@ -266,13 +266,13 @@ void CBW_Decode(void) {
                 case SCSI_READ10:  //0x28
                     SCSI_Read10_Cmd();
                     break;
-                /*case SCSI_WRITE10:
+                /*case SCSI_WRITE10:  //0x2A
                     SCSI_Write10_Cmd();
                     break;
-                case SCSI_VERIFY10:
+                case SCSI_VERIFY10:  //0x2F
                     SCSI_Verify10_Cmd(CBW.bLUN);
                     break;
-                case SCSI_FORMAT_UNIT:
+                case SCSI_FORMAT_UNIT:  //0x04
                     SCSI_Format_Cmd(CBW.bLUN);
                     break;*/
                     
