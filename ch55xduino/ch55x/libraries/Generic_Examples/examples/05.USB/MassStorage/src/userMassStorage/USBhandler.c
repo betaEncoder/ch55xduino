@@ -12,6 +12,8 @@ __xdata __at (EP1_ADDR) uint8_t  Ep1Buffer[128];     //IN and OUT buffer, must b
 uint16_t SetupLen;
 uint8_t SetupReq,UsbConfig;
 
+void Mass_Storage_Reset (void);
+
 __code uint8_t *pDescr;
 
 volatile uint8_t usbMsgFlags=0;    // uint8_t usbMsgFlags copied from VUSB
@@ -65,7 +67,8 @@ void USB_EP0_SETUP(){
                             len = 1;        // Always 1 byte reply
                             break;
                         case 0xFF:        // Bulk-Only Mass Storage Reset
-                            //nothing to reset
+                            Mass_Storage_Reset();
+                            len = 0;
                             break;
                         default:
                             len = 0xFF;
