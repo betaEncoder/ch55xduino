@@ -147,9 +147,21 @@ void CBW_Decode(void) {
         } else {
             // Valid CBW
             switch (CBW.CB[0]) {
-                /*case SCSI_REQUEST_SENSE:
-                    SCSI_RequestSense_Cmd (CBW.bLUN);
-                    break;*/
+                case SCSI_REQUEST_SENSE:  //0x03
+                    {
+                        for (uint8_t i=0; i<REQUEST_SENSE_DATA_LEN; i++)
+                            BOT_Tx_Buf[i] = Scsi_Sense_Data[i];
+                        
+                        BOT_Tx_Buf[2] = SCSI_Sense_Key;
+                        BOT_Tx_Buf[12] = SCSI_Sense_Asc;
+                        
+                        if (CBW.CB[4] <= REQUEST_SENSE_DATA_LEN) {
+                            Reply_Request(CBW.CB[4]);
+                        } else {
+                            Reply_Request(REQUEST_SENSE_DATA_LEN);
+                        }
+                    }
+                    break;
                 case SCSI_INQUIRY:  //0x12
                     {
                         __code uint8_t* Inquiry_Data;
