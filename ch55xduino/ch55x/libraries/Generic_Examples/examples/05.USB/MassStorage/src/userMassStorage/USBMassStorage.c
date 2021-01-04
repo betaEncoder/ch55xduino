@@ -440,12 +440,7 @@ void SCSI_Read10_Cmd() { //Global_LBA_BlockNbr
         if (TransferState == TXFR_ONGOING ) {
             //!!!!            RW_LED_ON();
             
-            //!!!!!!!!LUN_Read(curAddr);  //use global lun
-            //TEST ONLY!!!!!
-            for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
-                BOT_Tx_Buf[i] = i;
-            }
-            //!!!!!!
+            LUN_Read(curAddr); 
             
             curAddr += BULK_MAX_PACKET_SIZE;
             dataResidue -= BULK_MAX_PACKET_SIZE;
