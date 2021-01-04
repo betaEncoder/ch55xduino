@@ -209,10 +209,29 @@ void CBW_Decode(void) {
                     break;
                 /*case SCSI_MODE_SENSE10:
                     SCSI_ModeSense10_Cmd (CBW.bLUN);
-                    break;
-                case SCSI_READ_FORMAT_CAPACITIES:
-                    SCSI_ReadFormatCapacity_Cmd(CBW.bLUN);
                     break;*/
+                case SCSI_READ_FORMAT_CAPACITIES:  //0x23
+                    do{
+                        if (LUN_GetStatus() != 0 ) {
+                            //Set_Scsi_Sense_Data
+                            SCSI_Sense_Key = NOT_READY;
+                            SCSI_Sense_Asc = MEDIUM_NOT_PRESENT;
+                            Transfer_Failed_ReadWrite();
+                            break;
+                        }
+                        
+                        BOT_Tx_Buf[0] = 0x00;
+                        BOT_Tx_Buf[1] = 0x00;
+                        BOT_Tx_Buf[2] = 0x00;
+                        BOT_Tx_Buf[3] = 0x08;    // Capacity List Length
+                        
+                        for (uint8_t i=0;i<8;i++){
+                            BOT_Tx_Buf[4+i]=formatCapacity[i];
+                        }
+                        
+                        Reply_Request(READ_FORMAT_CAPACITY_DATA_LEN);
+                    }while(0);
+                    break;
                 case SCSI_READ_CAPACITY10:  //0x25
                     do{
                         if (LUN_GetStatus()) {
