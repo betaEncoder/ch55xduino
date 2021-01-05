@@ -6,21 +6,24 @@
 extern __xdata Bulk_Only_CBW CBW;
 
 //FAT info: http://www.c-jump.com/CIS24/Slides/FAT/lecture.html
+//http://elm-chan.org/docs/fat_e.html
+//FAT12<4087 clusters. FAT16>4087 <65526clusters
+//FAT16 FAT is easier to generate
 
 __code const uint8_t diskCapacity[8]=
 {
-    0x00,0x00,0x4F,0xFF, //能够访问的最大逻辑块地址
+    0x00,0x00,0x3F,0xFF, //能够访问的最大逻辑块地址
     0x00,0x00,0x02,0x00  //块的长度
     //所以该磁盘的容量为
-    //(0x4FFF+1)*0x200 = 0xA00000 = 10*1024*1024 = 10MB.
+    //(0x3FFF+1)*0x200 = 0x800000 = 8*1024*1024 = 8MB.
 };
 
 __code const uint8_t formatCapacity[8]=
 {
-    0x00,0x00,0x50,0x00, //能够访问的最大逻辑块地址
+    0x00,0x00,0x40,0x00, //能够访问的最大逻辑块地址
     0x02,0x00,0x02,0x00  //块的长度, // 02:Descriptor Code: Formatted Media
     //所以该磁盘的容量为
-    //(0x4FFF+1)*0x200 = 0xA00000 = 10*1024*1024 = 10MB.
+    //(0x3FFF+1)*0x200 = 0x800000 = 8*1024*1024 = 8MB.
 };
 
 __xdata uint8_t emuDisk_Status = MAL_OK;
@@ -49,7 +52,7 @@ __code const uint8_t DBR_data[62]={
     0xeb, 0x3e, 0x90,          //Instructions to jump to boot code
     'M','S','D','O','S','5','.','0', //Name string (MSDOS5.0)
     0x00, 0x02,                //Bytes/sector (0x0200 = 512)
-    0x08,                      //Sectors/cluster (8)
+    0x01,                      //Sectors/cluster (1)
     0x01, 0x00,                //Size of reserved area (1 sector)
     0x02,                      //Number of FATs (2)
     0x00, 0x02,                //Max. number of root directory entries (0x0200 = 512)
@@ -59,7 +62,7 @@ __code const uint8_t DBR_data[62]={
     0x20, 0x00,                //Sectors/track (0x0020 = 32)
     0x40, 0x00,                //Number of heads (0x0040 = 64)
     0x00, 0x00, 0x00, 0x00,    //Number of sector before partition (0)
-    0x00, 0x50, 0x00, 0x00,    //Total number of sectors，10M is 0x5000, 2560 clusters, FAT12 is less than 4087 clusters
+    0x00, 0x40, 0x00, 0x00,    //Total number of sectors，8M is 0x4000, 16384 clusters, FAT16 is more than 4087 clusters
     0x80,                      //Drive number (hard disk)
     0x00,                      //Reserved
     0x29,                      //Extended boot signature
@@ -74,22 +77,12 @@ __code const uint8_t DBR_data[62]={
 };
 
 
-//1 cluster = 32 sectors = 16KB
+//1 cluster = 1 sectors = 0.5KB
 //emulated file allocation table
 //little-endian
 //Unused (0x0000) Cluster in use by a file(Next cluster) Bad cluster (0xFFF7) Last cluster in a file (0xFFF8-0xFFFF)。
-__code const uint8_t FAT_data[64]={
-    0xF0, 0xFF, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00 ,0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00 ,0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00 ,0x00, 0x00,  0x00, 0x00, 0x00, 0x00
+__code const uint8_t FAT_data[]={   //first 2 sector reserved
+    0x00, 0x00, 0x00, 0x00, 0xF8, 0xFF,
 };
 
 
@@ -220,7 +213,7 @@ void LUN_Read (uint32_t curAddr) {
         __code uint8_t* FAT_data_ptr=&FAT_data[FAT_data_index];
         
         for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
-            if (FAT_data_index<64){
+            if (FAT_data_index<sizeof(FAT_data)){
                 BOT_Tx_Buf[i] = *FAT_data_ptr++;
             }else{
                 BOT_Tx_Buf[i] = 0x00;
