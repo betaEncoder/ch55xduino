@@ -128,10 +128,10 @@ __code const uint8_t ReadmeFileData[]=
 #define FILE_CLUSTER_LIMIT (((FILE_LEN+4095)/4096)+3)
 
 
-//根目录
-__code const uint8_t RootDir[96]={
+//Root directory
+__code const uint8_t RootDir[]={
     //label, match DBR
-    'S', 'p', 'e', 'e', 'd', ' ', 'D', 'e', 'm', 'o', 'n',
+    'C', 'H', '5', '5', 'X', ' ', 'M', 'S', 'D', ' ', ' ',
     0x08,                  //文件属性，表示磁盘标卷
     0x00,                  //保留
     0x00,                  //创建时间毫秒时间戳, Byte 13
@@ -184,34 +184,6 @@ __code const uint8_t RootDir[96]={
     //文件长度
     (sizeof(ReadmeFileData)-1),((sizeof(ReadmeFileData)-1)>>8), 0x00, 0x00,
     
-    //根目录下的测试文件
-    //文件名“TEST.TXT”
-    'T',  'E',   'S',  'T', ' ', ' ', ' ', ' ',  'T', 'X', 'T',
-    0x01,                  //文件属性，表示只读文件
-    0x00,                  //保留
-    0x00,                  //创建时间毫秒时间戳
-    //文件创建时间，15点48分26秒
-    TIME_LB(15,48,26), TIME_HB(15,48,26),
-    
-    //文件创建日期,2008年8月19日
-    DATE_LB(2008,8,19), DATE_HB(2008,8,19),
-    
-    //最后访问日期
-    DATE_LB(2008,8,20), DATE_HB(2008,8,20),
-    
-    0x00, 0x00,            //起始簇号高位字节，FAT12/16必须为0
-    
-    //最后修改时间,15点50分33秒
-    TIME_LB(15,50,33), TIME_HB(15,50,33),
-    
-    //最后修改日期，2008年8月19日
-    DATE_LB(2008,8,19), DATE_HB(2008,8,19),
-    
-    0x03, 0x00,            //起始簇低字，簇3。  The first cluster has an address of 2. I.e., there is no addressable cluster 0 or 1
-    
-    //文件长度
-//    (sizeof(TestFileData)-1),((sizeof(TestFileData)-1)>>8), 0x00, 0x00,
-    ((FILE_LEN)&0xFF),((FILE_LEN>>8)&0xFF), ((FILE_LEN>>16)&0xFF), ((FILE_LEN>>24)&0xFF),   //511 sector*4KB. Each byte in flash takes 4 bytes to display
 
 };
 
@@ -256,6 +228,28 @@ void LUN_Read (uint32_t curAddr) {
             FAT_data_index++;
         }
     
+    }else if ( (curAddr>=(uint32_t)(512*65L) && curAddr<(512*65L+sizeof(RootDir)) )){ //0x8200    Root directory, 512 items, 32 bytes each
+        uint8_t rootAddrIndex = curAddr - 512*65L;
+        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
+            if (rootAddrIndex<sizeof(RootDir)){
+                BOT_Tx_Buf[i] = RootDir[rootAddrIndex];
+            }else{
+                BOT_Tx_Buf[i] = 0;
+            }
+            rootAddrIndex++;
+        }
+        
+    } else if ( (curAddr>=512*97L && curAddr<(512*97L+ (4096) ))){  //0xC200 1st cluster
+        uint16_t file_data_index = curAddr - 512*97L;
+        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
+            if (file_data_index<sizeof(ReadmeFileData)){
+                BOT_Tx_Buf[i] = ReadmeFileData[file_data_index];
+            }else{
+                BOT_Tx_Buf[i] = 0x00;
+            }
+            file_data_index++;
+        }
+    
     }else{
         for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
             BOT_Tx_Buf[i] = 0;
@@ -267,10 +261,7 @@ void LUN_Read (uint32_t curAddr) {
 
 // Write BULK_MAX_PACKET_SIZE bytes of data from BOT_Rx_Buf to device
 void LUN_Write (uint32_t curAddr) {
-    uint8_t lun=CBW.bLUN;
-    if (lun == 0) {
-        //EEPROM_Write(BOT_Rx_Buf, U32B1(curAddr), U32B0(curAddr), BULK_MAX_PACKET_SIZE);
-    }
+    //EEPROM_Write(BOT_Rx_Buf, U32B1(curAddr), U32B0(curAddr), BULK_MAX_PACKET_SIZE);
 }
 
 
