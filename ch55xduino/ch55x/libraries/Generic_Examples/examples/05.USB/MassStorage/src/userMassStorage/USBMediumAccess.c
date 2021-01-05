@@ -75,15 +75,14 @@ __code const uint8_t DBR_data[62]={
 
 
 //1 cluster = 32 sectors = 16KB
-//模拟的文件分配表
-//其中项0为0xFF8，项1为0xFFF，表示已经使用。
-//项2为0xFFF，表示文件结束。其余项为0，表示未使用
-//yz Zx XY, FAT12 xyz is the one pointer entry and XYZ is the second pointer entry.
+//emulated file allocation table
+//little-endian
+//Unused (0x0000) Cluster in use by a file(Next cluster) Bad cluster (0xFFF7) Last cluster in a file (0xFFF8-0xFFFF)。
 __code const uint8_t FAT_data[64]={
-    0xF0, 0xFF, 0xFF,
-    0xFF, 0x4F, 0x00,
-    0x05, 0x60, 0x00,
-    0xFF, 0x0F, 0x00,
+    0xF0, 0xFF, 0x00,
+    0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
     0x00, 0x00 ,0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
@@ -222,10 +221,11 @@ uint8_t LUN_GetStatus () {
 
 // Read BULK_MAX_PACKET_SIZE bytes of data from device to BOT_Tx_Buf
 void LUN_Read (uint32_t curAddr) {
+    uint8_t i;
     if ( (curAddr>=0 && curAddr<512)){  //Boot Sector
         uint16_t DBR_data_index = curAddr;
         __code uint8_t* DBR_data_ptr=&DBR_data[DBR_data_index];
-        for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
             if (DBR_data_index<62){
                 BOT_Tx_Buf[i] = *DBR_data_ptr++;
             }else if (DBR_data_index==510){
@@ -237,6 +237,25 @@ void LUN_Read (uint32_t curAddr) {
             }
             DBR_data_index++;
         }
+    }else if ( (curAddr>=512 && curAddr<(512+512*64L)) ){  //0x200 0x4200, Each FAT is 32 sectors
+        uint16_t FAT_data_index;
+        if (curAddr>=512*33L){  //FAT2
+            FAT_data_index=curAddr-512*33L;
+        }else{                  //FAT1
+            FAT_data_index=curAddr-512;
+        }
+        
+        __code uint8_t* FAT_data_ptr=&FAT_data[FAT_data_index];
+        
+        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
+            if (FAT_data_index<64){
+                BOT_Tx_Buf[i] = *FAT_data_ptr++;
+            }else{
+                BOT_Tx_Buf[i] = 0x00;
+            }
+            FAT_data_index++;
+        }
+    
     }else{
         for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
             BOT_Tx_Buf[i] = 0;
