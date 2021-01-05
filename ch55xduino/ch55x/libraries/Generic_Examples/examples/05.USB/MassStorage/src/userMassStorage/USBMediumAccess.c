@@ -189,10 +189,9 @@ void LUN_Read (uint32_t curAddr) {
     uint8_t i;
     if ( (curAddr>=0 && curAddr<512)){  //Boot Sector
         uint16_t DBR_data_index = curAddr;
-        __code uint8_t* DBR_data_ptr=&DBR_data[DBR_data_index];
         for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
             if (DBR_data_index<62){
-                BOT_Tx_Buf[i] = *DBR_data_ptr++;
+                BOT_Tx_Buf[i] = DBR_data[DBR_data_index];
             }else if (DBR_data_index==510){
                 BOT_Tx_Buf[i] = 0x55;
             }else if (DBR_data_index==511){
@@ -210,11 +209,9 @@ void LUN_Read (uint32_t curAddr) {
             FAT_data_index=curAddr-512;
         }
         
-        __code uint8_t* FAT_data_ptr=&FAT_data[FAT_data_index];
-        
         for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
             if (FAT_data_index<sizeof(FAT_data)){
-                BOT_Tx_Buf[i] = *FAT_data_ptr++;
+                BOT_Tx_Buf[i] = FAT_data[FAT_data_index];
             }else{
                 BOT_Tx_Buf[i] = 0x00;
             }
