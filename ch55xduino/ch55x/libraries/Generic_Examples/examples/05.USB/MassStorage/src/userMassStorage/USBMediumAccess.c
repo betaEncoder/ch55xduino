@@ -184,69 +184,73 @@ uint8_t LUN_GetStatus () {
     return emuDisk_Status;
 }
 
+void LUN_Read_func_DBR(uint16_t DBR_data_index){    //separate funcs relieve the register usage
+    for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+        if (DBR_data_index<62){
+            BOT_Tx_Buf[i] = DBR_data[DBR_data_index];
+        }else if (DBR_data_index==510){
+            BOT_Tx_Buf[i] = 0x55;
+        }else if (DBR_data_index==511){
+            BOT_Tx_Buf[i] = 0xAA;
+        }else{
+            BOT_Tx_Buf[i] = 0x90;   //nop for boot code
+        }
+        DBR_data_index++;
+    }
+}
+
+void LUN_Read_func_FAT(uint16_t FAT_data_index){    //separate funcs relieve the register usage
+    for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+        if (FAT_data_index<sizeof(FAT_data)){
+            BOT_Tx_Buf[i] = FAT_data[FAT_data_index];
+        }else{
+            BOT_Tx_Buf[i] = 0x00;
+        }
+        FAT_data_index++;
+    }
+}
+
+void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve the register usage
+    for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+        if (rootAddrIndex<sizeof(RootDir)){
+            BOT_Tx_Buf[i] = RootDir[rootAddrIndex];
+        }else{
+            BOT_Tx_Buf[i] = 0;
+        }
+        rootAddrIndex++;
+    }
+}
+
+void LUN_Read_func_FirstFile(uint16_t file_data_index){    //separate funcs relieve the register usage
+    for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+        if (file_data_index<sizeof(ReadmeFileData)){
+            BOT_Tx_Buf[i] = ReadmeFileData[file_data_index];
+        }else{
+            BOT_Tx_Buf[i] = 0x00;
+        }
+        file_data_index++;
+    }
+}
+
 // Read BULK_MAX_PACKET_SIZE bytes of data from device to BOT_Tx_Buf
 void LUN_Read (uint32_t curAddr) {
-    uint8_t i;
     if ( (curAddr>=0 && curAddr<512)){  //Boot Sector
-        uint16_t DBR_data_index = curAddr;
-        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
-            if (DBR_data_index<62){
-                BOT_Tx_Buf[i] = DBR_data[DBR_data_index];
-            }else if (DBR_data_index==510){
-                BOT_Tx_Buf[i] = 0x55;
-            }else if (DBR_data_index==511){
-                BOT_Tx_Buf[i] = 0xAA;
-            }else{
-                BOT_Tx_Buf[i] = 0x90;   //nop for boot code
-            }
-            DBR_data_index++;
-        }
+        LUN_Read_func_DBR(curAddr);
     }else if ( (curAddr>=512 && curAddr<(512+512*64L)) ){  //0x200 0x4200, Each FAT is 32 sectors
-        uint16_t FAT_data_index;
         if (curAddr>=512*33L){  //FAT2
-            FAT_data_index=curAddr-512*33L;
+            LUN_Read_func_FAT(curAddr-512*33L);
         }else{                  //FAT1
-            FAT_data_index=curAddr-512;
+            LUN_Read_func_FAT(curAddr-512);
         }
-        
-        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
-            if (FAT_data_index<sizeof(FAT_data)){
-                BOT_Tx_Buf[i] = FAT_data[FAT_data_index];
-            }else{
-                BOT_Tx_Buf[i] = 0x00;
-            }
-            FAT_data_index++;
-        }
-    
     }else if ( (curAddr>=(uint32_t)(512*65L) && curAddr<(512*65L+sizeof(RootDir)) )){ //0x8200    Root directory, 512 items, 32 bytes each
-        uint8_t rootAddrIndex = curAddr - 512*65L;
-        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
-            if (rootAddrIndex<sizeof(RootDir)){
-                BOT_Tx_Buf[i] = RootDir[rootAddrIndex];
-            }else{
-                BOT_Tx_Buf[i] = 0;
-            }
-            rootAddrIndex++;
-        }
-        
-    } else if ( (curAddr>=512*97L && curAddr<(512*97L+ (4096) ))){  //0xC200 1st cluster
-        uint16_t file_data_index = curAddr - 512*97L;
-        for (i=0;i<BULK_MAX_PACKET_SIZE;i++){
-            if (file_data_index<sizeof(ReadmeFileData)){
-                BOT_Tx_Buf[i] = ReadmeFileData[file_data_index];
-            }else{
-                BOT_Tx_Buf[i] = 0x00;
-            }
-            file_data_index++;
-        }
-    
+        LUN_Read_func_Root_DIR(curAddr - 512*65L);
+    }else if ( (curAddr>=512*97L && curAddr<(512*97L+ (4096) ))){  //0xC200 1st cluster
+        LUN_Read_func_FirstFile(curAddr - 512*97L);
     }else{
         for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
             BOT_Tx_Buf[i] = 0;
         }
     }
-    
-    
 }
 
 // Write BULK_MAX_PACKET_SIZE bytes of data from BOT_Rx_Buf to device
