@@ -4,12 +4,12 @@
 
 #include "src/userMassStorage/USBMassStorage.h"
 
-__code const uint8_t ReadmeFile[] =
+__code const uint8_t ReadmeFileContent[] =
 {
-  "This is a test file on speed demon.\n\r"
+  "This is a test file on Ch55xduino.\r\n"
 };
 
-void fileCallback(uint16_t a) {
+void longfileCallback(uint16_t offset) {
   for (uint8_t i = 0; i < BULK_MAX_PACKET_SIZE; i++) {
     BOT_Tx_Buf[i]='a';
   }
@@ -22,7 +22,7 @@ __code File_Entry filesOnDrive[] = {
     .filedate = {DATE_LB(2008, 8, 19), DATE_HB(2008, 8, 19)},
     .filesize = 10,
     .fileCallBackType = CONST_DATA_FILE,
-    .filePtr = {.constPtr = ReadmeFile},
+    .filePtr = {.constPtr = ReadmeFileContent},
   },
   {
     .filename = {'R', '1', '1', 'D', 'M', 'E', ' ', ' ', 'T', 'X', 'T'},
@@ -30,7 +30,7 @@ __code File_Entry filesOnDrive[] = {
     .filedate = {DATE_LB(2008, 8, 19), DATE_HB(2008, 8, 19)},
     .filesize = 10,
     .fileCallBackType = FUNCTION_CALLBACK_FILE,
-    .filePtr = {.funcPtr = fileCallback},
+    .filePtr = {.funcPtr = longfileCallback},
   }
 };
 
