@@ -58,7 +58,7 @@ __code const uint8_t DBR_data[62]={
     0x00, 0x02,                //Max. number of root directory entries (0x0200 = 512)
     0x00, 0x00,                //Total number of sectors (0, not used)
     0xF8,                      //Media type (hard disk)
-    0x20, 0x00,                //FAT size (0x0020 = 32 sectors)
+    0x40, 0x00,                //FAT size (0x0040 = 64 sectors)
     0x20, 0x00,                //Sectors/track (0x0020 = 32)
     0x01, 0x00,                //Number of heads (0x0001 = 1)
     0x00, 0x00, 0x00, 0x00,    //Number of sector before partition (0)
@@ -236,16 +236,16 @@ void LUN_Read_func_Files(uint16_t file_data_index){    //separate funcs relieve 
 void LUN_Read (uint32_t curAddr) {
     if ( curAddr<512 ){  //Boot Sector
         LUN_Read_func_DBR(curAddr);
-    }else if ( curAddr<(512+512*64L) ){  //0x200 0x4200, Each FAT is 32 sectors
-        if (curAddr>=512*33L){  //FAT2
-            LUN_Read_func_FAT(curAddr-512*33L);
+    }else if ( curAddr<(512+512*128L) ){  //0x200 0x8200, Each FAT is 32 sectors
+        if (curAddr>=512*65L){  //FAT2
+            LUN_Read_func_FAT(curAddr-512*65L);
         }else{                  //FAT1
             LUN_Read_func_FAT(curAddr-512);
         }
-    }else if ( (curAddr<512*97L) ){ //0x8200    Root directory, 512 items, 32 bytes each
-        LUN_Read_func_Root_DIR(curAddr - 512*65L);
-    }else {  //0xC200 1st usable cluster, with index 2.
-        LUN_Read_func_Files(curAddr - 512*97L);
+    }else if ( (curAddr<512*161L) ){ //0x10200    Root directory, 512 items, 32 bytes each
+        LUN_Read_func_Root_DIR(curAddr - 512*129L);
+    }else {  //0x14200 1st usable cluster, with index 2.
+        LUN_Read_func_Files(curAddr - 512*161L);
     }
 }
 
