@@ -9,15 +9,27 @@ __code const uint8_t ReadmeFileContent[] =
   "This is a test file on Ch55xduino.\r\n"
 };
 
-#define LONGFILE_SIZE (2000)
+//File should be smaller than 32K
+#define LONGFILE_SIZE (2000)  
 
 void longfileCallback(uint16_t offset) {
   for (uint8_t i = 0; i < BULK_MAX_PACKET_SIZE; i++) {
+    uint8_t returnVal = 0;
     if (offset < LONGFILE_SIZE) {
-      BOT_Tx_Buf[i] = 'a';
-    } else {
-      BOT_Tx_Buf[i] = 0;
+      //make each line 32 charactors.
+      uint16_t lineCount = offset / 32;
+      uint8_t lineOffset = offset % 32;
+      if (lineOffset == 30) {
+        returnVal = '\r';
+      } else if (lineOffset == 31) {
+        returnVal = '\n';
+      } else if (lineOffset == (lineCount % 32)) {
+        returnVal = '*';
+      } else {
+        returnVal = ' ';
+      }
     }
+    BOT_Tx_Buf[i] = returnVal;
     offset++;
   }
 }
