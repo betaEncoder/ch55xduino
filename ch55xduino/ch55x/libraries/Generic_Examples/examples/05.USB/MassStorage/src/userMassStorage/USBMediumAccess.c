@@ -213,13 +213,14 @@ void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve
 void LUN_Read_func_Files(uint16_t file_data_index){    //separate funcs relieve the register usage
     uint8_t fileIndex = file_data_index/32768;
     uint16_t fileOffset = file_data_index%32768;
-    if (fileIndex<filesOnDriveCount){
+    uint16_t fileSize = filesOnDrive[fileIndex].filesize;
+    if (fileIndex<filesOnDriveCount && fileOffset<fileSize){
         //check file response type
         uint8_t responseType = filesOnDrive[fileIndex].fileCallBackType;
         if (responseType == CONST_DATA_FILE){
             __code const uint8_t *dateArray = filesOnDrive[fileIndex].filePtr.constPtr;
             for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
-                BOT_Tx_Buf[i] = dateArray[fileOffset];
+                BOT_Tx_Buf[i] = (fileOffset<fileSize)?dateArray[fileOffset]:0;
                 fileOffset++;
             }
         }else{
