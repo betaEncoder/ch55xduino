@@ -23,9 +23,6 @@ __xdata uint8_t SCSI_Sense_Asc;
 __xdata uint8_t TransferState = TXFR_IDLE;
 __xdata uint32_t curAddr, endAddr;
 
-//!!!
-#pragma callee_saves sendCharDebug
-void sendCharDebug(char c);
 
 void USBInit(){
     USBDeviceCfg();                                                       //Device mode configuration
@@ -98,16 +95,10 @@ void CBW_Decode(void) {
     // Copy CBW from Endpoint Rx Buffer
     for (uint8_t i = 0; i < BOT_EP_Rx_Length; i++){
         ((uint8_t*)(&CBW))[i] = BOT_Rx_Buf[i];
-        //sendCharDebug(BOT_Rx_Buf[i]);//!!!!!!!
     }
     
     //U32_XLittle(&CBW.dDataLength, &BOT_Rx_Buf[8]);
     dataResidue = CBW.dDataLength;
-    
-    
-    P1_1=0;//!!!!!!!
-    sendCharDebug('L');//!!!!!!!
-    sendCharDebug(BOT_EP_Rx_Length);//!!!!!!!
     
     if (BOT_EP_Rx_Length != BOT_CBW_PACKET_LENGTH) {
         Bot_Abort(BOTH_DIR);
@@ -122,12 +113,6 @@ void CBW_Decode(void) {
         Set_CSW (CSW_CMD_FAILED, SEND_CSW_DISABLE);
         return;
     }
-        
-        P1_1=1;//!!!!!!!
-    sendCharDebug('W');//!!!!!!!
-    sendCharDebug(CBW.bCBLength);//!!!!!!!
-    sendCharDebug('C');//!!!!!!!
-    sendCharDebug(CBW.CB[0]);//!!!!!!!
     
     if ((CBW.CB[0] == SCSI_READ10 ) || (CBW.CB[0] == SCSI_WRITE10 )) {
         // Calculate Logical Block Address, convert from BigEndian to LittleEndian
@@ -438,7 +423,7 @@ void SCSI_Read10_Cmd() { //Global_LBA_BlockNbr
         }
         
         if (TransferState == TXFR_ONGOING ) {
-            //!!!!            RW_LED_ON();
+            //RW_LED_ON();
             
             LUN_Read(curAddr); 
             
@@ -449,7 +434,7 @@ void SCSI_Read10_Cmd() { //Global_LBA_BlockNbr
             BOT_EP_Tx_Valid();    // Enable Tx
             
             if (curAddr >= endAddr) {
-                //!!!!                RW_LED_OFF();
+                //RW_LED_OFF();
                 curAddr = 0;
                 endAddr = 0;
                 Bot_State = BOT_DATA_IN_LAST;
