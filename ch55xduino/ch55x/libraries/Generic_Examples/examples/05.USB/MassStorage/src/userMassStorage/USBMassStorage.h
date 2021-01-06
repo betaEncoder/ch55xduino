@@ -134,7 +134,8 @@ void Transfer_Data_Request_MergeParameter(uint32_t Data_Len_Data_Pointer);
 #define Transfer_Data_Request(DATA_PTR,DATA_LEN) { Transfer_Data_Request_MergeParameter( ((((uint32_t)(DATA_LEN))<<16)) | ((uint16_t)(DATA_PTR)) ); }
 void Reply_Request(uint8_t Data_Len);
 void Transfer_Failed_ReadWrite(void);
-void Set_CSW (uint8_t CSW_Status, __xdata uint8_t Send_Permission);
+void Set_CSW_MergeParameter (uint16_t Send_Permission_CSW_Status);
+#define Set_CSW(CSW_Status,Send_Permission) { Set_CSW_MergeParameter( ((Send_Permission)<<8) | (CSW_Status) ); }
 void Bot_Abort(uint8_t Direction);
 
 void SCSI_Read10_Cmd();

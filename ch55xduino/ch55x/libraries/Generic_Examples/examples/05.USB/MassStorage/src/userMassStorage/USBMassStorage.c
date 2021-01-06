@@ -332,8 +332,11 @@ void Transfer_Failed_ReadWrite(void) {
     Bot_State = BOT_DATA_IN_LAST_FAIL;
 }
 
-void Set_CSW (uint8_t CSW_Status, __xdata uint8_t Send_Permission)
-{
+//void Set_CSW (uint8_t CSW_Status, __xdata uint8_t Send_Permission)
+void Set_CSW_MergeParameter (uint16_t Send_Permission_CSW_Status){
+    uint8_t CSW_Status = Send_Permission_CSW_Status&0xFF;
+    uint8_t Send_Permission = Send_Permission_CSW_Status>>8;
+    
     //Set the SCW with the needed fields.
     //uint8_t CSW_Status this filed can be CSW_CMD_PASSED,CSW_CMD_FAILED,or CSW_PHASE_ERROR.
     
