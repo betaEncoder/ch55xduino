@@ -10,12 +10,14 @@ __code const uint8_t ReadmeFile[] =
 };
 
 void fileCallback(uint16_t a) {
-
+  for (uint8_t i = 0; i < BULK_MAX_PACKET_SIZE; i++) {
+    BOT_Tx_Buf[i]='a';
+  }
 }
 
-__code File_Entry filesOnDrive[1] = {
+__code File_Entry filesOnDrive[] = {
   {
-    .filename = {'R', 'E', 'A', 'D', 'M', '2', ' ', ' ', 'T', 'X', 'T'},
+    .filename = {'R', 'E', 'A', 'D', 'M', 'E', ' ', ' ', 'T', 'X', 'T'},
     .filetime = {TIME_LB(15, 48, 26), TIME_HB(15, 48, 26),},
     .filedate = {DATE_LB(2008, 8, 19), DATE_HB(2008, 8, 19)},
     .filesize = 10,
@@ -32,7 +34,7 @@ __code File_Entry filesOnDrive[1] = {
   }
 };
 
-__code uint8_t filesOnDriveCount = sizeof(filesOnDrive)/sizeof(filesOnDrive[0]);
+__code uint8_t filesOnDriveCount = sizeof(filesOnDrive) / sizeof(File_Entry);
 
 
 

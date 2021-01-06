@@ -81,9 +81,9 @@ __code const uint8_t DBR_data[62]={
 //emulated file allocation table
 //little-endian
 //Unused (0x0000) Cluster in use by a file(Next cluster) Bad cluster (0xFFF7) Last cluster in a file (0xFFF8-0xFFFF)。
-__code const uint8_t FAT_data[]={   //first 2 sector reserved
-    0x00, 0x00, 0x00, 0x00, 0xF8, 0xFF,
-};
+//__code const uint8_t FAT_data[]={   //first 2 sector reserved
+//    0x00, 0x00, 0x00, 0x00, 0xF8, 0xFF,
+//};
 
 
 extern __code File_Entry filesOnDrive[];    //refer to main file
@@ -140,11 +140,21 @@ void LUN_Read_func_DBR(uint16_t DBR_data_index){    //separate funcs relieve the
 
 void LUN_Read_func_FAT(uint16_t FAT_data_index){    //separate funcs relieve the register usage
     for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
-        if (FAT_data_index<sizeof(FAT_data)){
-            BOT_Tx_Buf[i] = FAT_data[FAT_data_index];
-        }else{
-            BOT_Tx_Buf[i] = 0x00;
+        uint8_t fileIndex = ((FAT_data_index-4)/2)/64;  //64 sector reserved per file
+        uint8_t fileOffset = ((FAT_data_index-4)/2)%64;
+        uint8_t sendVal=0;
+        
+        if (fileIndex<filesOnDriveCount){
+            if (fileOffset==0){ //1 sector for now.
+                uint16_t fatEntry = 0xFFF8;
+                if (FAT_data_index&1){
+                    sendVal = fatEntry>>8;
+                }else{
+                    sendVal = fatEntry;
+                }
+            }
         }
+        BOT_Tx_Buf[i] = sendVal;
         FAT_data_index++;
     }
 }
@@ -201,18 +211,26 @@ void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve
 }
 
 void LUN_Read_func_Files(uint16_t file_data_index){    //separate funcs relieve the register usage
-    
-    
-    for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
-        if (file_data_index<10){
-            BOT_Tx_Buf[i] = 1;
+    uint8_t fileIndex = file_data_index/32768;
+    uint16_t fileOffset = file_data_index%32768;
+    if (fileIndex<filesOnDriveCount){
+        //check file response type
+        uint8_t responseType = filesOnDrive[fileIndex].fileCallBackType;
+        if (responseType == CONST_DATA_FILE){
+            __code const uint8_t *dateArray = filesOnDrive[fileIndex].filePtr.constPtr;
+            for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+                BOT_Tx_Buf[i] = dateArray[fileOffset];
+                fileOffset++;
+            }
         }else{
-            BOT_Tx_Buf[i] = 0x00;
+            pFileCBFn funcPtr = filesOnDrive[fileIndex].filePtr.funcPtr;
+            funcPtr(fileOffset);
         }
-        file_data_index++;
+    }else{
+        for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+            BOT_Tx_Buf[i] = 0x0;
+        }
     }
-    
-    
 }
 
 // Read BULK_MAX_PACKET_SIZE bytes of data from device to BOT_Tx_Buf
