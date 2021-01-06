@@ -300,7 +300,11 @@ void CBW_Decode(void) {
 
 
 
-void Transfer_Data_Request(__code uint8_t* Data_Pointer, __xdata uint8_t Data_Len) {
+//void Transfer_Data_Request(__code uint8_t* Data_Pointer, __xdata uint8_t Data_Len) {
+void Transfer_Data_Request_MergeParameter(uint32_t Data_Len_Data_Pointer){
+    uint8_t Data_Len = Data_Len_Data_Pointer>>16;
+    __code uint8_t* Data_Pointer = (__code uint8_t*)(Data_Len_Data_Pointer&0xFFFF);
+    
     //Send the request response to the PC HOST.
     dataResidue -= Data_Len;
     

@@ -130,7 +130,8 @@ Bulk_Only_CBW;
 void Mass_Storage_In (void);
 void Mass_Storage_Out (void);
 void CBW_Decode(void);
-void Transfer_Data_Request(__code uint8_t* Data_Pointer, __xdata uint8_t Data_Len);
+void Transfer_Data_Request_MergeParameter(uint32_t Data_Len_Data_Pointer);
+#define Transfer_Data_Request(DATA_PTR,DATA_LEN) { Transfer_Data_Request_MergeParameter( ((((uint32_t)(DATA_LEN))<<16)) | ((uint16_t)(DATA_PTR)) ); }
 void Reply_Request(uint8_t Data_Len);
 void Transfer_Failed_ReadWrite(void);
 void Set_CSW (uint8_t CSW_Status, __xdata uint8_t Send_Permission);
