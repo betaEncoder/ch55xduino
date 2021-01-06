@@ -143,10 +143,14 @@ void LUN_Read_func_FAT(uint16_t FAT_data_index){    //separate funcs relieve the
         uint8_t fileIndex = ((FAT_data_index-4)/2)/64;  //64 sector reserved per file
         uint8_t fileOffset = ((FAT_data_index-4)/2)%64;
         uint8_t sendVal=0;
+        uint8_t clusterUsage = (filesOnDrive[fileIndex].filesize+511)/512;
         
         if (fileIndex<filesOnDriveCount){
-            if (fileOffset==0){ //1 sector for now.
-                uint16_t fatEntry = 0xFFF8;
+            if (fileOffset<clusterUsage){
+                uint16_t fatEntry = 0xFFF8; //end of file
+                if ((fileOffset+1)<clusterUsage){
+                    fatEntry = 64*fileIndex + fileOffset + 3;   //make FAT link to next cluster.
+                }
                 if (FAT_data_index&1){
                     sendVal = fatEntry>>8;
                 }else{
