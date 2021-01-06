@@ -60,7 +60,7 @@ __code const uint8_t DBR_data[62]={
     0xF8,                      //Media type (hard disk)
     0x20, 0x00,                //FAT size (0x0020 = 32 sectors)
     0x20, 0x00,                //Sectors/track (0x0020 = 32)
-    0x40, 0x00,                //Number of heads (0x0040 = 64)
+    0x01, 0x00,                //Number of heads (0x0001 = 1)
     0x00, 0x00, 0x00, 0x00,    //Number of sector before partition (0)
     0x00, 0x40, 0x00, 0x00,    //Total number of sectors. 8M is 0x4000, 16384 clusters, FAT16 is more than 4087 clusters
     0x80,                      //Drive number (hard disk)
@@ -89,21 +89,21 @@ __code const uint8_t RootDir[32]={
     0x00,                  //Create time, fine resolution: 10 ms units, Byte 13
     
     //Create time
-    TIME_LB(15,27,35), TIME_HB(15,27,35),
+    TIME_LB(12, 34, 56), TIME_HB(12, 34, 56),
     
     //Create date
-    DATE_LB(2008,8,19), DATE_HB(2008,8,19),
+    DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2),
     
     //Last access date
-    DATE_LB(2008,8,20), DATE_HB(2008,8,20),
+    DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2),
     
     0x00, 0x00,            //High two bytes of first cluster number, keep 0 for FAT12/16
     
     //Last modified time
-    TIME_LB(15,36,47), TIME_HB(15,36,47),
+    TIME_LB(12, 34, 56), TIME_HB(12, 34, 56),
     
     //Last modified date
-    DATE_LB(2008,8,19), DATE_HB(2008,8,19),
+    DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2),
     
     0x00, 0x00,            //Start of file in clusters in FAT12 and FAT16.
     0x00, 0x00, 0x00, 0x00,   //file size

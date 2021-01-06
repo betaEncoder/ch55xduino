@@ -25,16 +25,16 @@ void longfileCallback(uint16_t offset) {
 __code File_Entry filesOnDrive[] = {  //keep filename UPPERCASE
   {
     .filename = {'R', 'E', 'A', 'D', 'M', 'E', ' ', ' ', 'T', 'X', 'T'},
-    .filetime = {TIME_LB(15, 48, 26), TIME_HB(15, 48, 26),},
-    .filedate = {DATE_LB(2008, 8, 19), DATE_HB(2008, 8, 19)},
-    .filesize = 10,
+    .filetime = {TIME_LB(12, 34, 56), TIME_HB(12, 34, 56)},
+    .filedate = {DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2)},
+    .filesize = sizeof(ReadmeFileContent),
     .fileCallBackType = CONST_DATA_FILE,
     .filePtr = {.constPtr = ReadmeFileContent},
-    },
+  },
   {
     .filename = {'L', 'O', 'N', 'G', 'F', 'I', 'L', 'E', 'T', 'X', 'T'},
-    .filetime = {TIME_LB(15, 48, 26), TIME_HB(15, 48, 26),},
-    .filedate = {DATE_LB(2008, 8, 19), DATE_HB(2008, 8, 19)},
+    .filetime = {TIME_LB(12, 34, 56), TIME_HB(12, 34, 56)},
+    .filedate = {DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2)},
     .filesize = LONGFILE_SIZE,
     .fileCallBackType = FUNCTION_CALLBACK_FILE,
     .filePtr = {.funcPtr = longfileCallback},
@@ -50,5 +50,5 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+
 }
