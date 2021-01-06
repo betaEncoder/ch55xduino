@@ -15,7 +15,7 @@ void longfileCallback(uint16_t offset) {
   }
 }
 
-__code File_Entry filesOnDrive[] = {
+__code File_Entry filesOnDrive[] = {  //keep filename UPPERCASE
   {
     .filename = {'R', 'E', 'A', 'D', 'M', 'E', ' ', ' ', 'T', 'X', 'T'},
     .filetime = {TIME_LB(15, 48, 26), TIME_HB(15, 48, 26),},
@@ -25,7 +25,7 @@ __code File_Entry filesOnDrive[] = {
     .filePtr = {.constPtr = ReadmeFileContent},
   },
   {
-    .filename = {'R', '1', '1', 'D', 'M', 'E', ' ', ' ', 'T', 'X', 'T'},
+    .filename = {'L', 'O', 'N', 'G', 'F', 'I', 'L', 'E', 'T', 'X', 'T'},
     .filetime = {TIME_LB(15, 48, 26), TIME_HB(15, 48, 26),},
     .filedate = {DATE_LB(2008, 8, 19), DATE_HB(2008, 8, 19)},
     .filesize = 10,
