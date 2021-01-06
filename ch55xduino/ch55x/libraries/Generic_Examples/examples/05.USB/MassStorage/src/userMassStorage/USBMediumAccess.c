@@ -159,87 +159,53 @@ void LUN_Read_func_FAT(uint16_t FAT_data_index){    //separate funcs relieve the
         FAT_data_index++;
     }
 }
-
 void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve the register usage
     for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
+        uint8_t sendVal=0;
         if (rootAddrIndex<32){  // RootDir entry
-            BOT_Tx_Buf[i] = RootDir[rootAddrIndex];
+            sendVal = RootDir[rootAddrIndex];
         }else if (rootAddrIndex< (32*(1+filesOnDriveCount)) ){
             uint8_t fileIndex = (rootAddrIndex/32)-1;
             uint8_t offsetIndex = rootAddrIndex%32;
             if (offsetIndex<11){
-                BOT_Tx_Buf[i] = filesOnDrive[fileIndex].filename[offsetIndex];
+                sendVal = filesOnDrive[fileIndex].filename[offsetIndex];
             }else if (offsetIndex==11){ //File Attributes
-                BOT_Tx_Buf[i] = 0x01; //Read Only.
+                sendVal = 0x01; //Read Only.
             }else if (offsetIndex==12){ //Reserved
-                BOT_Tx_Buf[i] = 0x00;
+                sendVal = 0x00;
             }else if (offsetIndex==13){ //Create time, fine resolution: 10 ms units
-                BOT_Tx_Buf[i] = 0x00;
+                sendVal = 0x00;
             }else if (offsetIndex<16){ //Create time
-                BOT_Tx_Buf[i] = filesOnDrive[fileIndex].filetime[offsetIndex-14];
+                sendVal = filesOnDrive[fileIndex].filetime[offsetIndex-14];
             }else if (offsetIndex<18){ //Create date
-                BOT_Tx_Buf[i] = filesOnDrive[fileIndex].filedate[offsetIndex-16];
+                sendVal = filesOnDrive[fileIndex].filedate[offsetIndex-16];
             }else if (offsetIndex<20){ //Last access date
-                BOT_Tx_Buf[i] = filesOnDrive[fileIndex].filedate[offsetIndex-18];
+                sendVal = filesOnDrive[fileIndex].filedate[offsetIndex-18];
             }else if (offsetIndex<22){ //High two bytes of first cluster number, keep 0 for FAT12/16
-                BOT_Tx_Buf[i] = 0;
+                sendVal = 0;
             }else if (offsetIndex<24){ //Last modified time
-                BOT_Tx_Buf[i] = filesOnDrive[fileIndex].filetime[offsetIndex-22];
+                sendVal = filesOnDrive[fileIndex].filetime[offsetIndex-22];
             }else if (offsetIndex<26){ //Last modified date
-                BOT_Tx_Buf[i] = filesOnDrive[fileIndex].filedate[offsetIndex-24];
+                sendVal = filesOnDrive[fileIndex].filedate[offsetIndex-24];
             }else if (offsetIndex<28){ //Start of file in clusters in FAT12 and FAT16.
                 uint16_t startClusters = 2 + fileIndex*64;  //make file 64 clusters, 32K apart. Should be enough.
                 if (offsetIndex == 26){
-                    BOT_Tx_Buf[i] = startClusters & 0xFF;
+                    sendVal = startClusters & 0xFF;
                 }else{
-                    BOT_Tx_Buf[i] = (startClusters>>8) & 0xFF;
+                    sendVal = (startClusters>>8) & 0xFF;
                 }
             }else if (offsetIndex<30){ //Low 2 byte of file size
                 uint16_t filesize = filesOnDrive[fileIndex].filesize;
                 if (offsetIndex == 28){
-                    BOT_Tx_Buf[i] = filesize & 0xFF;
+                    sendVal = filesize & 0xFF;
                 }else{
-                    BOT_Tx_Buf[i] = (filesize>>8) & 0xFF;
+                    sendVal = (filesize>>8) & 0xFF;
                 }
             }else{
-                BOT_Tx_Buf[i] = 0;
             }
-        
-            /*
-            
-            //根目录下的测试文件
-            //文件名“TEST.TXT”
-            'R',  'E',   'A',  'D', 'M', 'E', ' ', ' ',  'T', 'X', 'T',
-            0x01,                  //文件属性，表示只读文件
-            0x00,                  //保留
-            0x00,                  //创建时间毫秒时间戳
-            //文件创建时间，15点48分26秒
-            TIME_LB(15,48,26), TIME_HB(15,48,26),
-            
-            //文件创建日期,2008年8月19日
-            DATE_LB(2008,8,19), DATE_HB(2008,8,19),
-            
-            //最后访问日期
-            DATE_LB(2008,8,20), DATE_HB(2008,8,20),
-            
-            0x00, 0x00,            //起始簇号高位字节，FAT12/16必须为0
-            
-            //最后修改时间,15点50分33秒
-            TIME_LB(15,50,33), TIME_HB(15,50,33),
-            
-            //最后修改日期，2008年8月19日
-            DATE_LB(2008,8,19), DATE_HB(2008,8,19),
-            
-            0x02, 0x00,            //起始簇低字，簇2。  The first cluster has an address of 2. I.e., there is no addressable cluster 0 or 1
-            
-            //文件长度
-            (sizeof(ReadmeFileData)-1),((sizeof(ReadmeFileData)-1)>>8), 0x00, 0x00,
-            */
-            
-            
         }else{
-            BOT_Tx_Buf[i] = 0;
         }
+        BOT_Tx_Buf[i] = sendVal;
         rootAddrIndex++;
     }
 }
