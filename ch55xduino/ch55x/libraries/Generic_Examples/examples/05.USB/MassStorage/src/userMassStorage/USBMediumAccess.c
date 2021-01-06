@@ -12,17 +12,17 @@ extern __xdata Bulk_Only_CBW CBW;
 
 __code const uint8_t diskCapacity[8]=
 {
-    0x00,0x00,0x3F,0xFF, //能够访问的最大逻辑块地址
-    0x00,0x00,0x02,0x00  //块的长度
-    //所以该磁盘的容量为
+    0x00,0x00,0x3F,0xFF, //Max accessible logic block address
+    0x00,0x00,0x02,0x00  //size of block
+    //Size of this disk is:
     //(0x3FFF+1)*0x200 = 0x800000 = 8*1024*1024 = 8MB.
 };
 
 __code const uint8_t formatCapacity[8]=
 {
-    0x00,0x00,0x40,0x00, //能够访问的最大逻辑块地址
-    0x02,0x00,0x02,0x00  //块的长度, // 02:Descriptor Code: Formatted Media
-    //所以该磁盘的容量为
+    0x00,0x00,0x40,0x00, //Max accessible logic block count
+    0x02,0x00,0x02,0x00  //size of block // 02:Descriptor Code: Formatted Media
+    //Size of this disk is:
     //(0x3FFF+1)*0x200 = 0x800000 = 8*1024*1024 = 8MB.
 };
 
@@ -88,17 +88,6 @@ __code const uint8_t FAT_data[]={   //first 2 sector reserved
 
 extern __code File_Entry filesOnDrive[];    //refer to main file
 extern __code uint8_t filesOnDriveCount;    //refer to main file
-//测试文件的数据
-__code const uint8_t ReadmeFileData[]=
-{
-    "This is a test file on speed demon.\n\r"
-};
-
-
-
-
-//#define FILE_LEN 65536L
-//#define FILE_CLUSTER_LIMIT (((FILE_LEN+4095)/4096)+3)
 
 
 //Root directory
@@ -159,6 +148,7 @@ void LUN_Read_func_FAT(uint16_t FAT_data_index){    //separate funcs relieve the
         FAT_data_index++;
     }
 }
+
 void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve the register usage
     for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
         uint8_t sendVal=0;
@@ -210,35 +200,35 @@ void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve
     }
 }
 
-void LUN_Read_func_FirstFile(uint16_t file_data_index){    //separate funcs relieve the register usage
+void LUN_Read_func_Files(uint16_t file_data_index){    //separate funcs relieve the register usage
+    
+    
     for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
-        if (file_data_index<sizeof(ReadmeFileData)){
-            BOT_Tx_Buf[i] = ReadmeFileData[file_data_index];
+        if (file_data_index<10){
+            BOT_Tx_Buf[i] = 1;
         }else{
             BOT_Tx_Buf[i] = 0x00;
         }
         file_data_index++;
     }
+    
+    
 }
 
 // Read BULK_MAX_PACKET_SIZE bytes of data from device to BOT_Tx_Buf
 void LUN_Read (uint32_t curAddr) {
-    if ( (curAddr>=0 && curAddr<512)){  //Boot Sector
+    if ( curAddr<512 ){  //Boot Sector
         LUN_Read_func_DBR(curAddr);
-    }else if ( (curAddr>=512 && curAddr<(512+512*64L)) ){  //0x200 0x4200, Each FAT is 32 sectors
+    }else if ( curAddr<(512+512*64L) ){  //0x200 0x4200, Each FAT is 32 sectors
         if (curAddr>=512*33L){  //FAT2
             LUN_Read_func_FAT(curAddr-512*33L);
         }else{                  //FAT1
             LUN_Read_func_FAT(curAddr-512);
         }
-    }else if ( (curAddr>=(uint32_t)(512*65L) && curAddr<(512*65L+sizeof(RootDir)) )){ //0x8200    Root directory, 512 items, 32 bytes each
+    }else if ( (curAddr<512*97L) ){ //0x8200    Root directory, 512 items, 32 bytes each
         LUN_Read_func_Root_DIR(curAddr - 512*65L);
-    }else if ( (curAddr>=512*97L && curAddr<(512*97L+ (4096) ))){  //0xC200 1st cluster
-        LUN_Read_func_FirstFile(curAddr - 512*97L);
-    }else{
-        for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
-            BOT_Tx_Buf[i] = 0;
-        }
+    }else {  //0xC200 1st usable cluster, with index 2.
+        LUN_Read_func_Files(curAddr - 512*97L);
     }
 }
 
