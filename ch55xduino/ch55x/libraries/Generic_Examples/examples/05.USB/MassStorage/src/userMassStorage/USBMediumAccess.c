@@ -62,7 +62,7 @@ __code const uint8_t DBR_data[62]={
     0x20, 0x00,                //Sectors/track (0x0020 = 32)
     0x40, 0x00,                //Number of heads (0x0040 = 64)
     0x00, 0x00, 0x00, 0x00,    //Number of sector before partition (0)
-    0x00, 0x40, 0x00, 0x00,    //Total number of sectors，8M is 0x4000, 16384 clusters, FAT16 is more than 4087 clusters
+    0x00, 0x40, 0x00, 0x00,    //Total number of sectors. 8M is 0x4000, 16384 clusters, FAT16 is more than 4087 clusters
     0x80,                      //Drive number (hard disk)
     0x00,                      //Reserved
     0x29,                      //Extended boot signature
@@ -76,16 +76,6 @@ __code const uint8_t DBR_data[62]={
  
 };
 
-
-//1 cluster = 1 sectors = 0.5KB
-//emulated file allocation table
-//little-endian
-//Unused (0x0000) Cluster in use by a file(Next cluster) Bad cluster (0xFFF7) Last cluster in a file (0xFFF8-0xFFFF)。
-//__code const uint8_t FAT_data[]={   //first 2 sector reserved
-//    0x00, 0x00, 0x00, 0x00, 0xF8, 0xFF,
-//};
-
-
 extern __code File_Entry filesOnDrive[];    //refer to main file
 extern __code uint8_t filesOnDriveCount;    //refer to main file
 
@@ -94,29 +84,29 @@ extern __code uint8_t filesOnDriveCount;    //refer to main file
 __code const uint8_t RootDir[32]={
     //label, match DBR
     'C', 'H', '5', '5', 'X', ' ', 'M', 'S', 'D', ' ', ' ',
-    0x08,                  //文件属性，表示磁盘标卷
-    0x00,                  //保留
-    0x00,                  //创建时间毫秒时间戳, Byte 13
+    0x08,                  //File Attributes, Volume Label (0x08).
+    0x00,                  //Reserved
+    0x00,                  //Create time, fine resolution: 10 ms units, Byte 13
     
-    //文件创建时间，15点27分35秒
+    //Create time
     TIME_LB(15,27,35), TIME_HB(15,27,35),
     
-    //文件创建日期，2008年8月19日
+    //Create date
     DATE_LB(2008,8,19), DATE_HB(2008,8,19),
     
-    //最后访问日期，2008年8月20日
+    //Last access date
     DATE_LB(2008,8,20), DATE_HB(2008,8,20),
     
-    0x00, 0x00,            //起始簇号高位字节，FAT12/16必须为0
+    0x00, 0x00,            //High two bytes of first cluster number, keep 0 for FAT12/16
     
-    //最后修改时间，15点36分47秒
+    //Last modified time
     TIME_LB(15,36,47), TIME_HB(15,36,47),
     
-    //最后修改日期，2008年8月19日
+    //Last modified date
     DATE_LB(2008,8,19), DATE_HB(2008,8,19),
     
-    0x00, 0x00,            //起始簇低字
-    0x00, 0x00, 0x00, 0x00,   //文件长度
+    0x00, 0x00,            //Start of file in clusters in FAT12 and FAT16.
+    0x00, 0x00, 0x00, 0x00,   //file size
 };
 
 uint8_t LUN_GetStatus () {
@@ -138,6 +128,10 @@ void LUN_Read_func_DBR(uint16_t DBR_data_index){    //separate funcs relieve the
     }
 }
 
+//1 cluster = 1 sectors = 0.5KB
+//emulated file allocation table
+//little-endian
+//Unused (0x0000) Cluster in use by a file(Next cluster) Bad cluster (0xFFF7) Last cluster in a file (0xFFF8-0xFFFF).
 void LUN_Read_func_FAT(uint16_t FAT_data_index){    //separate funcs relieve the register usage
     for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
         uint8_t fileIndex = ((FAT_data_index-4)/2)/64;  //64 sector reserved per file

@@ -73,7 +73,7 @@ __code uint8_t Prod_Des[]={                                //Produce String Desc
     'u',0x00,'i',0x00,'n',0x00,'o',0x00,
     ' ',0x00,'M',0x00,'S',0x00,'D',0x00
 };
-__code uint16_t Prod_DesLen = sizeof(Prod_Des);∂
+__code uint16_t Prod_DesLen = sizeof(Prod_Des);
 
 __code uint8_t Manuf_Des[]={
     0x0E,0x03,
