@@ -208,7 +208,7 @@ void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve
     }
 }
 
-void LUN_Read_func_Files(uint16_t file_data_index){    //separate funcs relieve the register usage
+void LUN_Read_func_Files(uint32_t file_data_index){    //separate funcs relieve the register usage
     uint8_t fileIndex = file_data_index/32768;
     uint16_t fileOffset = file_data_index%32768;
     uint16_t fileSize = filesOnDrive[fileIndex].filesize;
