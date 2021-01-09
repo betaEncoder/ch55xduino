@@ -139,6 +139,7 @@ void Set_CSW_MergeParameter (uint16_t Send_Permission_CSW_Status);
 void Bot_Abort(uint8_t Direction);
 
 void SCSI_Read10_Cmd();
+void SCSI_Write10_Cmd();
 uint8_t SCSI_Address_Management(uint8_t Cmd);
 
 
