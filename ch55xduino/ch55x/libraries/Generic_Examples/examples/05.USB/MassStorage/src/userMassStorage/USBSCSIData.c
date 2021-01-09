@@ -14,7 +14,7 @@ __code const uint8_t Mode_Sense6_data[] =
   {
     0x03,
     0x00,
-    0x80,   //refer to SBC-3, Table 97 - DEVICE-SPECIFIC PARAMETER field for direct-access block devices, 0x80 is WP
+    0x00,   //refer to SBC-3, Table 97 - DEVICE-SPECIFIC PARAMETER field for direct-access block devices, 0x80 is WP (Whole disk is read only). 0x00 is normal
     0x00,
   };
 
