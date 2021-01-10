@@ -30,7 +30,8 @@ typedef struct _File_Entry {
     uint8_t filedate[2];
     uint16_t filesize;
     uint8_t fileCallBackType;
-    union FileCBPtrUnion filePtr;
+    union FileCBPtrUnion fileReadHandler;
+    pFileCBFn fileWriteHandler;
 }File_Entry;
 
 //Time format (16Bits):

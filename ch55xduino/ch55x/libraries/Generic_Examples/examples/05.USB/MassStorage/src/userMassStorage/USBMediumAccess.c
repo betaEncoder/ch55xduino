@@ -225,13 +225,13 @@ void LUN_Read_func_Files(uint32_t file_data_index){    //separate funcs relieve 
         //check file response type
         uint8_t responseType = filesOnDrive[fileIndex].fileCallBackType;
         if (responseType == CONST_DATA_FILE){
-            __code const uint8_t *dateArray = filesOnDrive[fileIndex].filePtr.constPtr;
+            __code const uint8_t *dateArray = filesOnDrive[fileIndex].fileReadHandler.constPtr;
             for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
                 BOT_Tx_Buf[i] = (fileOffset<fileSize)?dateArray[fileOffset]:0;
                 fileOffset++;
             }
         }else{
-            pFileCBFn funcPtr = filesOnDrive[fileIndex].filePtr.funcPtr;
+            pFileCBFn funcPtr = filesOnDrive[fileIndex].fileReadHandler.funcPtr;
             funcPtr(fileOffset);
         }
     }else{
@@ -260,7 +260,11 @@ void LUN_Read (uint32_t curAddr) {
 
 // Write BULK_MAX_PACKET_SIZE bytes of data from BOT_Rx_Buf to device
 void LUN_Write (uint32_t curAddr) {
-    //EEPROM_Write(BOT_Rx_Buf, U32B1(curAddr), U32B0(curAddr), BULK_MAX_PACKET_SIZE);
+    if ( (curAddr<512*161L) ){ //0x10200    Root directory, 512 items, 32 bytes each
+        //don't care Root directory write, FAT write or Boot Sector write
+    }else {  //0x14200 1st usable cluster, with index 2.
+        //LUN_Write_func_Files(curAddr - 512*161L);
+    }
 }
 
 

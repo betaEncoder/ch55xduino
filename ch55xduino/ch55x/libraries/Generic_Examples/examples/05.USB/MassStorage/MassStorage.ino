@@ -41,7 +41,8 @@ __code File_Entry filesOnDrive[] = {  //keep filename UPPERCASE
     .filedate = {DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2)},
     .filesize = sizeof(ReadmeFileContent),
     .fileCallBackType = CONST_DATA_FILE,
-    .filePtr = {.constPtr = ReadmeFileContent},
+    .fileReadHandler = {.constPtr = ReadmeFileContent},
+    .fileWriteHandler = NULL,
   },
   {
     .filename = {'L', 'O', 'N', 'G', 'F', 'I', 'L', 'E', 'T', 'X', 'T'},
@@ -49,7 +50,8 @@ __code File_Entry filesOnDrive[] = {  //keep filename UPPERCASE
     .filedate = {DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2)},
     .filesize = LONGFILE_SIZE,
     .fileCallBackType = FUNCTION_CALLBACK_FILE,
-    .filePtr = {.funcPtr = longfileCallback},
+    .fileReadHandler = {.funcPtr = longfileCallback},
+    .fileWriteHandler = NULL,
   }
 };
 
