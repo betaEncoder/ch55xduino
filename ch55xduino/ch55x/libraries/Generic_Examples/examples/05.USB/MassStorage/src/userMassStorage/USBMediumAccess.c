@@ -134,23 +134,32 @@ void LUN_Read_func_DBR(uint16_t DBR_data_index){    //separate funcs relieve the
 //Unused (0x0000) Cluster in use by a file(Next cluster) Bad cluster (0xFFF7) Last cluster in a file (0xFFF8-0xFFFF).
 void LUN_Read_func_FAT(uint16_t FAT_data_index){    //separate funcs relieve the register usage
     for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
-        uint8_t fileIndex = ((FAT_data_index-4)/2)/64;  //64 sector reserved per file
-        uint8_t fileOffset = ((FAT_data_index-4)/2)%64;
         uint8_t sendVal=0;
-        uint8_t clusterUsage = (filesOnDrive[fileIndex].filesize+511)/512;
-        
-        if (fileIndex<filesOnDriveCount){
-            if (fileOffset<clusterUsage){
-                uint16_t fatEntry = 0xFFF8; //end of file
-                if ((fileOffset+1)<clusterUsage){
-                    fatEntry = 64*fileIndex + fileOffset + 3;   //make FAT link to next cluster.
-                }
-                if (FAT_data_index&1){
-                    sendVal = fatEntry>>8;
-                }else{
-                    sendVal = fatEntry;
+        //uint16_t fatEntry = 0x0000; //Free
+        uint16_t fatEntry = 0xFFF7; //Bad cluster
+        if (FAT_data_index<4){  //FAT16: FAT[0] = 0xFF??; FAT[1] = 0xFFFF; ?? in the value of FAT[0] is the same value of BPB_Media
+            if (FAT_data_index<2){
+                fatEntry = 0xFF00|DBR_data[21];
+            }else{
+                fatEntry = 0xFFFF;
+            }
+        }else{
+            uint8_t fileIndex = ((FAT_data_index-4)/2)/64;  //64 sector reserved per file
+            uint8_t fileOffset = ((FAT_data_index-4)/2)%64;
+            uint8_t clusterUsage = (filesOnDrive[fileIndex].filesize+511)/512;
+            if (fileIndex<filesOnDriveCount){
+                if (fileOffset<clusterUsage){
+                    fatEntry = 0xFFF8; //end of file
+                    if ((fileOffset+1)<clusterUsage){
+                        fatEntry = 64*fileIndex + fileOffset + 3;   //make FAT link to next cluster.
+                    }
                 }
             }
+        }
+        if (FAT_data_index&1){
+            sendVal = fatEntry>>8;
+        }else{
+            sendVal = fatEntry;
         }
         BOT_Tx_Buf[i] = sendVal;
         FAT_data_index++;
