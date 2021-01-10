@@ -30,6 +30,30 @@ void LEDControlCallback(uint16_t offset) {
   }
 }
 
+void dataflashReadCallback(uint16_t offset) {
+  for (uint8_t i = 0; i < BULK_MAX_PACKET_SIZE; i++) {
+    uint8_t returnVal = 0;
+    if (offset < 128) {
+      returnVal = eeprom_read_byte(((uint8_t)offset));
+    }
+    BOT_Tx_Buf[i] = returnVal;
+    offset++;
+  }
+}
+
+void dataflashWriteCallback(uint16_t offset) {
+  for (uint8_t i = 0; i < BULK_MAX_PACKET_SIZE; i++) {
+    uint8_t inputVal = BOT_Rx_Buf[i];
+    if (offset < 128) {
+      uint8_t eepromData = eeprom_read_byte(((uint8_t)offset));
+      if (eepromData != inputVal) {
+        eeprom_write_byte(((uint8_t)offset), inputVal);
+      }
+    }
+    offset++;
+  }
+}
+
 //File should be smaller than 32K
 #define LONGFILE_SIZE (2000)
 
@@ -82,6 +106,15 @@ __code File_Entry filesOnDrive[] = {  //keep filename UPPERCASE
     .fileCallBackType = CONST_DATA_FILE,
     .fileReadHandler = {.constPtr = LEDControlFileContent},
     .fileWriteHandler = LEDControlCallback, //always a function
+  },
+  {
+    .filename = {'D', 'A', 'T', 'F', 'L', 'A', 'S', 'H', 'B', 'I', 'N'},  //map dataflash to bin file
+    .filetime = {TIME_LB(12, 34, 56), TIME_HB(12, 34, 56)},
+    .filedate = {DATE_LB(2021, 1, 2), DATE_HB(2021, 1, 2)},
+    .filesize = 128,
+    .fileCallBackType = FUNCTION_CALLBACK_FILE,
+    .fileReadHandler = {.funcPtr = dataflashReadCallback},
+    .fileWriteHandler = dataflashWriteCallback, //always a function
   }
 };
 
