@@ -177,7 +177,11 @@ void LUN_Read_func_Root_DIR(uint16_t rootAddrIndex){    //separate funcs relieve
             if (offsetIndex<11){
                 sendVal = filesOnDrive[fileIndex].filename[offsetIndex];
             }else if (offsetIndex==11){ //File Attributes
-                sendVal = 0x01; //Read Only.
+                if (filesOnDrive[fileIndex].fileWriteHandler!=0){
+                    sendVal = 0x00; //Normal
+                }else{
+                    sendVal = 0x01; //Read Only
+                }
             }else if (offsetIndex==12){ //Reserved
                 sendVal = 0x00;
             }else if (offsetIndex==13){ //Create time, fine resolution: 10 ms units
@@ -231,8 +235,8 @@ void LUN_Read_func_Files(uint32_t file_data_index){    //separate funcs relieve 
                 fileOffset++;
             }
         }else{
-            pFileCBFn funcPtr = filesOnDrive[fileIndex].fileReadHandler.funcPtr;
-            funcPtr(fileOffset);
+            pFileCBFn readFuncPtr = filesOnDrive[fileIndex].fileReadHandler.funcPtr;
+            readFuncPtr(fileOffset);
         }
     }else{
         for (uint8_t i=0;i<BULK_MAX_PACKET_SIZE;i++){
@@ -258,12 +262,25 @@ void LUN_Read (uint32_t curAddr) {
     }
 }
 
+void LUN_Write_func_Files(uint32_t file_data_index){    //separate funcs relieve the register usage
+    uint8_t fileIndex = file_data_index/32768;
+    uint16_t fileOffset = file_data_index%32768;
+    uint16_t fileSize = filesOnDrive[fileIndex].filesize;
+
+    if (fileIndex<filesOnDriveCount && fileOffset<fileSize){
+        pFileCBFn writeFuncPtr = filesOnDrive[fileIndex].fileWriteHandler;
+        if (writeFuncPtr != 0){
+            writeFuncPtr(fileOffset);
+        }
+    }
+}
+
 // Write BULK_MAX_PACKET_SIZE bytes of data from BOT_Rx_Buf to device
 void LUN_Write (uint32_t curAddr) {
     if ( (curAddr<512*161L) ){ //0x10200    Root directory, 512 items, 32 bytes each
         //don't care Root directory write, FAT write or Boot Sector write
     }else {  //0x14200 1st usable cluster, with index 2.
-        //LUN_Write_func_Files(curAddr - 512*161L);
+        LUN_Write_func_Files(curAddr - 512*161L);
     }
 }
 
