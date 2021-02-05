@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include "include/ch554.h"
-#include "include/ch554_usb.h"
+#include "include/ch5xx.h"
+#include "include/ch5xx_usb.h"
 
 void eeprom_write_byte_2_params_DPTR (uint16_t addr_val){
 //using a single parameter of 16bit number utilize both DPL and DPH, avoid using memory to pass parameters
