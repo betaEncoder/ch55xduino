@@ -55,7 +55,13 @@ void setControlLineStateHandler(){
         EA = 0;                                                                    //Disabling all interrupts is required.
         delayMicroseconds(50000);
         delayMicroseconds(50000);
-        __asm__ ("lcall #0x3800");                                                 //Jump to bootloader code
+        
+#if BOOT_LOAD_ADDR == 0x3800
+        __asm__ ("lcall #0x3800");  //Jump to bootloader code
+#elif BOOT_LOAD_ADDR == 0xF400
+        __asm__ ("lcall #0xF400");  //todo: not working well, maybe timing not correct?
+#endif
+        
         while(1);
     }
     
