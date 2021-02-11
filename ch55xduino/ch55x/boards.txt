@@ -18,6 +18,7 @@ ch552.menu.clock.16external.build.f_cpu=16000000L
 ch552.build.board=ch55x
 ch552.build.core=ch55xduino
 ch552.build.variant=ch552
+ch552.build.mcu=CH552
 
 ch552.upload.use_1200bps_touch=true
 ch552.upload.wait_for_upload_port=false
@@ -65,6 +66,7 @@ ch551.menu.clock.16external.build.f_cpu=16000000L
 ch551.build.board=ch55x
 ch551.build.core=ch55xduino
 ch551.build.variant=ch552
+ch551.build.mcu=CH551
 
 ch551.upload.use_1200bps_touch=true
 ch551.upload.wait_for_upload_port=false
@@ -103,6 +105,7 @@ ch549.menu.clock.16external.build.f_cpu=16000000L
 ch549.build.board=ch55x
 ch549.build.core=ch55xduino
 ch549.build.variant=ch549
+ch549.build.mcu=CH549
 
 ch549.upload.use_1200bps_touch=true
 ch549.upload.wait_for_upload_port=false
