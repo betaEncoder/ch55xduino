@@ -30,8 +30,8 @@
 //#include <avr/pgmspace.h>
 //#include <avr/io.h>
 //#include <avr/interrupt.h>
-#include "include/ch554.h"
-#include "include/ch554_usb.h"
+#include "include/ch5xx.h"
+#include "include/ch5xx_usb.h"
 #include "pins_arduino_include.h"
 //Macro-based digital IO fucntions
 #include "wiring_digital_fast.h"

@@ -346,8 +346,7 @@ uint32_t millis()
              "    mov b, r1                                \n"
              );
              
-#else
-             //24M CLK
+#elif F_CPU == 24000000
     __asm__ (";return timer0_overflow_count>>3             \n"
              ";Or: return (timer0_overflow_count<<5)>>8    \n"
              ";Or: return (timer0_overflow_count*32)>>8    \n"
@@ -389,6 +388,9 @@ uint32_t millis()
              ";calculation finished, a already in place    \n"
              "    mov b, r1                                \n"
              );
+#else
+    #error "clock not supported yet"
+
 #endif
 }
 
@@ -465,6 +467,7 @@ void init()
     SAFE_MOD = 0x55;
     SAFE_MOD = 0xAA;
     
+#if defined(CH551) || defined(CH552)
 #if F_CPU == 32000000
     CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x07;  // 32MHz
 #elif F_CPU == 24000000
@@ -480,9 +483,32 @@ void init()
 #elif F_CPU == 750000
     CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x01;  // 750KHz
 #elif F_CPU == 187500
-    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x00;  // 187.5MHz
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x00;  // 187.5KHz
 #else
 #warning F_CPU invalid or not set
+#endif
+
+#elif defined(CH549)
+#if F_CPU == 48000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x07;  // 48MHz
+#elif F_CPU == 32000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x06;  // 32MHz
+#elif F_CPU == 24000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x05;  // 24MHz
+#elif F_CPU == 16000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x04;  // 16MHz
+#elif F_CPU == 12000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x03;  // 12MHz
+#elif F_CPU == 3000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x02;  // 3MHz
+#elif F_CPU == 750000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x01;  // 750KHz
+#elif F_CPU == 187500
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_SEL | 0x00;  // 187.5KHz
+#else
+#warning F_CPU invalid or not set
+#endif
+    
 #endif
     
     SAFE_MOD = 0x00;
