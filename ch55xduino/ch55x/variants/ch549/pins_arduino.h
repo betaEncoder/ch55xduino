@@ -46,7 +46,7 @@ __code uint8_t digital_pin_to_pwm_PGM[] = {
     NOT_ON_PWM,
     NOT_ON_PWM,
     NOT_ON_PWM,
-    PIN_PWM1,
+    NOT_ON_PWM,
     NOT_ON_PWM,
     NOT_ON_PWM,
     NOT_ON_PWM,	//not exist
@@ -63,15 +63,37 @@ __code uint8_t digital_pin_to_pwm_PGM[] = {
     NOT_ON_PWM,	//not exist
     NOT_ON_PWM, //not exist
 	
-    PIN_PWM1_, //PIN30
-    PIN_PWM2_,
+    NOT_ON_PWM, //PIN30
     NOT_ON_PWM,
     NOT_ON_PWM,
-    PIN_PWM2,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
     NOT_ON_PWM,
     NOT_ON_PWM,
     NOT_ON_PWM,
     NOT_ON_PWM,	//not exist
+    NOT_ON_PWM, //not exist
+    
+    NOT_ON_PWM, //PIN40
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM, //not exist
+    NOT_ON_PWM, //not exist
+    
+    NOT_ON_PWM, //PIN50
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM,
+    NOT_ON_PWM, //not exist
     NOT_ON_PWM, //not exist
 };
 
@@ -119,6 +141,28 @@ __code uint8_t PROGMEM digital_pin_to_port_PGM[] = {
     P3PORT,
     NOT_A_PORT,	//not exist
     NOT_A_PORT, //not exist
+    
+    P4PORT, //PIN40
+    P4PORT,
+    P4PORT,
+    P4PORT,
+    P4PORT,
+    P4PORT,
+    P4PORT,
+    P4PORT,
+    NOT_A_PORT, //not exist
+    NOT_A_PORT, //not exist
+    
+    P5PORT, //PIN50
+    P5PORT,
+    P5PORT,
+    P5PORT,
+    P5PORT,
+    P5PORT,
+    P5PORT,
+    P5PORT,
+    NOT_A_PORT, //not exist
+    NOT_A_PORT, //not exist
 };
 
 __code uint8_t digital_pin_to_bit_mask_PGM[] = {
@@ -165,6 +209,28 @@ __code uint8_t digital_pin_to_bit_mask_PGM[] = {
     _BV(7),
     0,	//not exist
     0, //not exist
+    
+    _BV(0), //PIN40
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+    _BV(6),
+    _BV(7),
+    0,    //not exist
+    0, //not exist
+    
+    _BV(0), //PIN50
+    _BV(1),
+    _BV(2),
+    _BV(3),
+    _BV(4),
+    _BV(5),
+    _BV(6),
+    _BV(7),
+    0,    //not exist
+    0, //not exist
 };
 
 __code uint8_t digital_pin_to_channel_PGM[] = {
@@ -180,11 +246,11 @@ __code uint8_t digital_pin_to_channel_PGM[] = {
     NOT_ANALOG, //not exist
 	
     NOT_ANALOG, //PIN10
-    0,
     NOT_ANALOG,
     NOT_ANALOG,
-    1,
-    2,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
     NOT_ANALOG,
     NOT_ANALOG,
     NOT_ANALOG,	//not exist
@@ -203,13 +269,35 @@ __code uint8_t digital_pin_to_channel_PGM[] = {
 	
     NOT_ANALOG, //PIN30
     NOT_ANALOG,
-    3,
+    NOT_ANALOG,
     NOT_ANALOG,
     NOT_ANALOG,
     NOT_ANALOG,
     NOT_ANALOG,
     NOT_ANALOG,
     NOT_ANALOG,	//not exist
+    NOT_ANALOG, //not exist
+    
+    NOT_ANALOG, //PIN40
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG, //not exist
+    NOT_ANALOG, //not exist
+    
+    NOT_ANALOG, //PIN50
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG,
+    NOT_ANALOG, //not exist
     NOT_ANALOG, //not exist
 };
 
