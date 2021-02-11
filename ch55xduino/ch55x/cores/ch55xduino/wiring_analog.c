@@ -5,6 +5,7 @@
 
 uint8_t analogRead(uint8_t pin)
 {
+#if defined(CH551) || defined(CH552)
     pin = analogPinToChannel(pin);
     
     if (pin == NOT_ANALOG) return 0;
@@ -18,6 +19,9 @@ uint8_t analogRead(uint8_t pin)
     while(ADC_START);
     
     return ADC_DATA;
+#else
+    return 0;
+#endif
 }
 
 
@@ -32,6 +36,7 @@ void analogWrite(uint8_t pin, __xdata uint16_t val)
     // writing with them.  Also, make sure the pin is in output mode
     // for consistenty with Wiring, which doesn't require a pinMode
     // call for the analog output pins.
+#if defined(CH551) || defined(CH552)
     pinMode(pin, OUTPUT);
     if (val == 0)
     {
@@ -74,5 +79,8 @@ void analogWrite(uint8_t pin, __xdata uint16_t val)
                 }
         }
     }
+#else
+    return;
+#endif
 }
 

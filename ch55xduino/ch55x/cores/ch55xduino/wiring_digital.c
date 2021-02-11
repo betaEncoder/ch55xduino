@@ -48,6 +48,7 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
 
 static void turnOffPWM(uint8_t pwm)
 {
+#if defined(CH551) || defined(CH552)
     switch (pwm)
     {
         case PIN_PWM1:
@@ -71,6 +72,9 @@ static void turnOffPWM(uint8_t pwm)
             }
             break;
     }
+#else
+    return;
+#endif
 }
 
 uint8_t digitalRead(uint8_t pin)

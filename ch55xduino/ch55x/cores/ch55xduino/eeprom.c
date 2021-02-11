@@ -7,6 +7,8 @@ void eeprom_write_byte_2_params_DPTR (uint16_t addr_val){
 #define ADDR_PARAM ((addr_val>>8)&0xff)
 #define VAL_PARAM ((addr_val>>0)&0xff)
     
+#if defined(CH551) || defined(CH552)
+    
     if (ADDR_PARAM>=128){
         return;
     }
@@ -25,11 +27,20 @@ void eeprom_write_byte_2_params_DPTR (uint16_t addr_val){
     SAFE_MOD = 0xAA;                                                           //Enter Safe mode
     GLOBAL_CFG &= ~bDATA_WE;                                                   //Disable DataFlash write
     SAFE_MOD = 0;                                                              //Exit Safe mode
+    
+#else
+    return;
+#endif
 }
 
 uint8_t eeprom_read_byte (uint8_t addr){
+#if defined(CH551) || defined(CH552)
+    
     ROM_ADDR_H = DATA_FLASH_ADDR >> 8;
     ROM_ADDR_L = addr<<1;                                                       //Addr must be even
     ROM_CTRL = ROM_CMD_READ;
     return ROM_DATA_L;
+#else
+    return 0;
+#endif
 }
