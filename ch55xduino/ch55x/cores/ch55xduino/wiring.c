@@ -509,6 +509,15 @@ void init()
 #warning F_CPU invalid or not set
 #endif
     
+#elif defined(CH559)
+#if F_CPU == 24000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_DIV | 12;  // 24MHz, 12M*(24 default PLL)/12=24M
+#elif F_CPU == 16000000
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_DIV | 18;  // 16MHz
+#else
+#warning F_CPU invalid or not set
+#endif
+    
 #endif
     
     SAFE_MOD = 0x00;

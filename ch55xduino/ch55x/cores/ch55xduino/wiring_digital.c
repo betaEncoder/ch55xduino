@@ -160,6 +160,7 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
             P4_DIR_PU &= ~bit;
         }
 #endif
+        //todo: OC mode for CH559
     }
 }
 
@@ -192,6 +193,7 @@ static void turnOffPWM(uint8_t pwm)
 #else
     return;
 #endif
+    //todo: PWM mode for CH559
 }
 
 uint8_t digitalRead(uint8_t pin)
