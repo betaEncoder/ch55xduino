@@ -501,13 +501,24 @@ void USBDeviceIntCfg()
 
 void USBDeviceEndPointCfg()
 {
+#if defined(CH559)
+    //CH559 use differend endianness for these registers
+    UEP0_DMA_H = ((uint16_t)Ep0Buffer >> 8);                                                      //Endpoint 0 data transfer address
+    UEP0_DMA_L = ((uint16_t)Ep0Buffer >> 0);                                                      //Endpoint 0 data transfer address
+    UEP1_DMA_H = ((uint16_t)Ep1Buffer >> 8);                                                      //Endpoint 1 data transfer address
+    UEP1_DMA_L = ((uint16_t)Ep1Buffer >> 0);                                                      //Endpoint 1 data transfer address
+    UEP2_DMA_H = ((uint16_t)Ep2Buffer >> 8);                                                      //Endpoint 2 data transfer address
+    UEP2_DMA_L = ((uint16_t)Ep2Buffer >> 0);                                                      //Endpoint 2 data transfer address
+#else
+    UEP0_DMA = (uint16_t) Ep0Buffer;                                                      //Endpoint 0 data transfer address
     UEP1_DMA = (uint16_t) Ep1Buffer;                                                      //Endpoint 1 data transfer address
     UEP2_DMA = (uint16_t) Ep2Buffer;                                                      //Endpoint 2 data transfer address
+#endif
+    
     UEP2_3_MOD = 0x0C;                                                         //Endpoint2 double buffer
     UEP1_CTRL = bUEP_AUTO_TOG | UEP_T_RES_NAK;                //Endpoint 1 automatically flips the sync flag, and IN transaction returns NAK
     UEP2_CTRL = bUEP_AUTO_TOG | UEP_T_RES_NAK | UEP_R_RES_ACK;        //Endpoint 2 automatically flips the sync flag, IN transaction returns NAK, OUT returns ACK
     
-    UEP0_DMA = (uint16_t) Ep0Buffer;                                                      //Endpoint 0 data transfer address
     UEP4_1_MOD = 0X40;                                                         //endpoint1 TX enable
     UEP0_CTRL = UEP_R_RES_ACK | UEP_T_RES_NAK;                //Manual flip, OUT transaction returns ACK, IN transaction returns NAK
 }
