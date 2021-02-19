@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------------
-CH554.H
-Header file for CH554 microcontrollers.
+CH559.H
+Header file for CH559 microcontrollers.
 ****************************************
 **  Copyright  (C)  W.ch  1999-2014   **
 **  Web:              http://wch.cn   **
 ****************************************
 --------------------------------------------------------------------------*/
 
-#ifndef __CH554_H__
-#define __CH554_H__
+#ifndef __CH559_H__
+#define __CH559_H__
 
 # define SBIT(name, addr, bit)  __sbit  __at(addr+bit)                  name
 # define SFR(name, addr)        __sfr   __at(addr)                      name
@@ -189,6 +189,14 @@ SFR(P0,	0x80);	// port 0 input & output
    SBIT(RXD_,	0x80, 2);	// alternate pin for RXD of UART0
    SBIT(URTS,	0x80, 1);	// RTS output for UART1
    SBIT(UDTR,	0x80, 0);	// DTR output for UART1
+   SBIT(P0_7,   0x80, 7);
+   SBIT(P0_6,   0x80, 6);
+   SBIT(P0_5,   0x80, 5);
+   SBIT(P0_4,   0x80, 4);
+   SBIT(P0_3,   0x80, 3);
+   SBIT(P0_2,   0x80, 2);
+   SBIT(P0_1,   0x80, 1);
+   SBIT(P0_0,   0x80, 0);
 SFR(P0_DIR,	0xC4);	// port 0 direction
 #define bUDCD             0x80      // DCD input for UART1
 #define bURI              0x40      // RI input for UART1
@@ -218,6 +226,14 @@ SFR(P1,	0x90);	// port 1 input & output, not 5VT
    SBIT(CAP2,	0x90, 1);	// capture2 input for timer2, not 5VT
    SBIT(T2,	0x90, 0);	// external count input, not 5VT
    SBIT(CAP1,	0x90, 0);	// capture1 input for timer2, not 5VT
+   SBIT(P1_7,   0x90, 7);
+   SBIT(P1_6,   0x90, 6);
+   SBIT(P1_5,   0x90, 5);
+   SBIT(P1_4,   0x90, 4);
+   SBIT(P1_3,   0x90, 3);
+   SBIT(P1_2,   0x90, 2);
+   SBIT(P1_1,   0x90, 1);
+   SBIT(P1_0,   0x90, 0);
 SFR(P1_IE,	0xB9);	// port 1 input enable
 #define bSCK              0x80      // serial clock for SPI0
 #define bMISO             0x40      // master serial data input or slave serial data output for SPI0
@@ -243,6 +259,14 @@ SFR(P2,	0xA0);	// port 2 input & output
    SBIT(SCK1,	0xA0, 3);	// serial clock output for SPI1
    SBIT(MISO1,	0xA0, 2);	// master serial data input for SPI1
    SBIT(MOSI1,	0xA0, 1);	// master serial data output for SPI1
+   SBIT(P2_7,   0xA0, 7);
+   SBIT(P2_6,   0xA0, 6);
+   SBIT(P2_5,   0xA0, 5);
+   SBIT(P2_4,   0xA0, 4);
+   SBIT(P2_3,   0xA0, 3);
+   SBIT(P2_2,   0xA0, 2);
+   SBIT(P2_1,   0xA0, 1);
+   SBIT(P2_0,   0xA0, 0);
 SFR(P2_DIR,	0xBC);	// port 2 direction
 #define bTXD1             0x80      // TXD output for UART1
 #define bDA7              0x80      // address 7 output for direct low address mode
@@ -270,6 +294,14 @@ SFR(P3,	0xB0);	// port 3 input & output
    SBIT(INT0,	0xB0, 2);	// external interrupt 0 input
    SBIT(TXD,	0xB0, 1);	// TXD output for UART0
    SBIT(RXD,	0xB0, 0);	// RXD input for UART0
+   SBIT(P3_7,   0xB0, 7);
+   SBIT(P3_6,   0xB0, 6);
+   SBIT(P3_5,   0xB0, 5);
+   SBIT(P3_4,   0xB0, 4);
+   SBIT(P3_3,   0xB0, 3);
+   SBIT(P3_2,   0xB0, 2);
+   SBIT(P3_1,   0xB0, 1);
+   SBIT(P3_0,   0xB0, 0);
 SFR(P3_DIR,	0xBE);	// port 3 direction
 #define bRD               0x80      // xdata or xBUS read strobe output
 #define bWR               0x40      // xdata or xBUS write strobe output
@@ -297,6 +329,14 @@ SFR(P4_OUT,	0xC0);	// port 4 output
    SBIT(CAP3_,	0xC0, 2);	// alternate pin for CAP3
    SBIT(LED2,	0xC0, 0);	// LED2 data output
    SBIT(RXD1_,	0xC0, 0);	// alternate pin for RXD1
+   SBIT(P4_OUT_7,   0xC0, 7);
+   SBIT(P4_OUT_6,   0xC0, 6);
+   SBIT(P4_OUT_5,   0xC0, 5);
+   SBIT(P4_OUT_4,   0xC0, 4);
+   SBIT(P4_OUT_3,   0xC0, 3);
+   SBIT(P4_OUT_2,   0xC0, 2);
+   SBIT(P4_OUT_1,   0xC0, 1);
+   SBIT(P4_OUT_0,   0xC0, 0);
 SFR(P4_IN,	0xC1);	// ReadOnly: port 4 input
 #define bSCK_             0x80      // alternate pin for SCK, not 5VT
 #define bSCS_             0x40      // alternate pin for SCS, not 5VT
@@ -1199,4 +1239,4 @@ ASM example:
        DJNZ R7,LOOP
 */
 
-#endif  // __CH554_H__
+#endif  // __CH559_H__
