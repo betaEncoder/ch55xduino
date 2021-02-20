@@ -65,7 +65,7 @@ uint32_t micros(){
              ";if (interruptOn) EA = 1;                    \n"
              "    mov _EA,c                                \n"
              
-             ";if ((TF0 in b) && (R4 != 255)){              \n"
+             ";if ((TF0 in b) && (R4 != 255)){             \n"
              "    jnb b.5,incTimer0_overf_cntCopyOver$     \n"
              "    mov a,#1     \n"
              "    add a,r4     \n"
@@ -156,16 +156,16 @@ uint32_t micros(){
              "    add a, r1                                \n"
              "    mov r1, a                                \n"
              "    mov a, r7                                \n"
-             "    addc a, r2                                \n"
+             "    addc a, r2                               \n"
              "    mov r2, a                                \n"
              "    pop a                                    \n"
-             "    addc a, r3                                \n"
+             "    addc a, r3                               \n"
              "    mov r3, a                                \n"
              "    pop a                                    \n"
-             "    addc a, r5                                \n"
+             "    addc a, r5                               \n"
              "    mov r5, a                                \n"
              
-             ";t=((3*t)>>1));                             \n"
+             ";t=((3*t)>>1));                              \n"
              
              "    mov b, #3                                \n"
              "    mov a, r4                                \n"
@@ -232,7 +232,7 @@ uint32_t micros(){
     
 
 __asm__ (
-             ";1m = 250t 1t=0.5us (m*250+t)/2  t is 0~249\n"
+             ";1m = 250t 1t=0.5us (m*250+t)/2  t is 0~249  \n"
              ";we need to return m*125+t/2                 \n"
              ";t=(t>>1);                                   \n"
              "    mov a,r4                                 \n"
