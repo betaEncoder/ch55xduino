@@ -200,7 +200,7 @@ uint32_t micros(){
              
              );
     //’dpl’ (LSB),’dph’,’b’ & ’acc’
-#else
+#elif F_CPU == 24000000
     //24M CLK
     
      /*1m = 250t 1t=0.5us (m*250+t-6)/2
@@ -272,6 +272,83 @@ __asm__ (
              "    addc a, r5                               \n"
              
              );
+#elif F_CPU == 56000000
+    //56M CLK, to change!!!
+    
+    /*1m = 250t 1t=0.5us (m*250+t-6)/2
+     
+     t=(t>>1)-3;
+     m=m*125;
+     
+     return ( m+t );*/
+    
+    //assembly has better support for multiplication
+    
+    
+    __asm__ (
+             ";1m = 250t 1t=0.5us (m*250+t-6)/2  t is 6~255\n"
+             ";we need to return m*125+t-3                 \n"
+             ";t=(t>>1)-3;                                 \n"
+             "    mov a,r4                                 \n"
+             "    clr c                                    \n"
+             "    rrc a                                    \n"
+             "    mov r4,a                                 \n"
+             //"    dec r4                                   \n"
+             //"    dec r4                                   \n"
+             //"    dec r4                                   \n"
+             // TODO: R4 may overflow, disable for now (3us offset may not be an issue?)
+             
+             ";m=m*125;                                    \n"
+             "    mov b, #125                              \n"
+             "    mov a, r0                                \n"
+             "    mul ab                                   \n"
+             "    mov r0, a                                \n"
+             "    mov r5, b                                \n"
+             
+             "    mov b, #125                              \n"
+             "    mov a, r1                                \n"
+             "    mul ab                                   \n"
+             "    add a, r5                                \n"
+             "    mov r1, a                                \n"
+             "    clr a                                    \n"
+             "    addc a, b                                \n"
+             "    mov r5, a                                \n"
+             
+             "    mov b, #125                              \n"
+             "    mov a, r2                                \n"
+             "    mul ab                                   \n"
+             "    add a, r5                                \n"
+             "    mov r2, a                                \n"
+             "    clr a                                    \n"
+             "    addc a, b                                \n"
+             "    mov r5, a                                \n"
+             
+             "    mov b, #125                              \n"
+             "    mov a, r3                                \n"
+             "    mul ab                                   \n"
+             "    add a, r5                                \n"
+             "    mov r3, a                                \n"
+             
+             ";return m+t                                  \n"
+             "    mov r5, #0                               \n"
+             "    mov a, r4                                \n"
+             "    add a, r0                                \n"
+             "    mov dpl, a                               \n"
+             "    mov a, r1                                \n"
+             "    addc a, r5                               \n"
+             "    mov dph, a                               \n"
+             "    mov a, r2                                \n"
+             "    addc a, r5                               \n"
+             "    mov b, a                                 \n"
+             "    mov a, r3                                \n"
+             "    addc a, r5                               \n"
+             
+             );
+
+#else
+#error "clock not supported yet"
+
+    
 #endif
     //return values: ’dpl’ 1B, ’dpl’ LSB & ’dph’ 2B,
     //’dpl’, ’dph’ and ’b’ 3B, ’dpl’,’dph’,’b’ & ’acc’ 4B
@@ -348,6 +425,48 @@ uint32_t millis()
              
 #elif F_CPU == 24000000
     __asm__ (";return timer0_overflow_count>>3             \n"
+             ";Or: return (timer0_overflow_count<<5)>>8    \n"
+             ";Or: return (timer0_overflow_count*32)>>8    \n"
+             "    mov b, #32                               \n"
+             "    mov a, r0                                \n"
+             "    mul ab                                   \n"
+             "    mov r0, b                                \n"
+             ";lowest 8 bit not used (a), r0 free to use   \n"
+             "    mov b, #32                               \n"
+             "    mov a, r1                                \n"
+             "    mul ab                                   \n"
+             "    add a, r0                                \n"
+             ";carry won't be set, if I calculated right   \n"
+             "    mov dpl, a                               \n"
+             "    mov r0, b                                \n"
+             
+             "    mov b, #32                               \n"
+             "    mov a, r2                                \n"
+             "    mul ab                                   \n"
+             "    add a, r0                                \n"
+             ";carry won't be set, if I calculated right   \n"
+             "    mov dph, a                               \n"
+             "    mov r0, b                                \n"
+             
+             "    mov b, #32                               \n"
+             "    mov a, r3                                \n"
+             "    mul ab                                   \n"
+             "    add a, r0                                \n"
+             ";carry won't be set, if I calculated right   \n"
+             "    mov r1, a                                \n"
+             "    mov r0, b                                \n"
+             
+             "    mov b, #32                               \n"
+             "    mov a, r4                                \n"
+             "    mul ab                                   \n"
+             "    add a, r0                                \n"
+             ";carry won't be set, if I calculated right   \n"
+             
+             ";calculation finished, a already in place    \n"
+             "    mov b, r1                                \n"
+             );
+#elif F_CPU == 56000000
+    __asm__ (";return timer0_overflow_count>>3             \n"  //to modify
              ";Or: return (timer0_overflow_count<<5)>>8    \n"
              ";Or: return (timer0_overflow_count*32)>>8    \n"
              "    mov b, #32                               \n"
@@ -514,6 +633,9 @@ void init()
     CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_DIV | 12;  // 24MHz, 12M*(24 default PLL)/12=24M
 #elif F_CPU == 16000000
     CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_DIV | 18;  // 16MHz
+#elif F_CPU == 56000000
+    PLL_CFG = (7<<5) | (28);    //Fusb4x = 12M*(28 PLL)/7=48M
+    CLOCK_CFG = CLOCK_CFG & ~ MASK_SYS_CK_DIV | 6;  // 56MHz, 12M*(28 PLL)/6=56M
 #else
 #warning F_CPU invalid or not set
 #endif
