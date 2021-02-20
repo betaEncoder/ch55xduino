@@ -287,39 +287,42 @@ __asm__ (
              
              );
 #elif F_CPU == 56000000
-    //56M CLK, to change!!!
+    //56M CLK
     
-    /*1m = 250t 1t=0.5us (m*250+t-6)/2
-     
-     t=(t>>1)-3;
-     m=m*125;
-     
-     return ( m+t );*/
+    /*1m = 224t 1t=0.21412us=3/14us (m*224+t)*3/14
+     m*48+t*3/14
+     //m in r0~r3
+     //t in r4*/
     
     //assembly has better support for multiplication
     
     
-    __asm__ (
-             ";1m = 250t 1t=0.5us (m*250+t-6)/2  t is 6~255\n"
-             ";we need to return m*125+t-3                 \n"
-             ";t=(t>>1)-3;                                 \n"
+    __asm__ (";t=t*3/14; t ranging 0~223                   \n"
              "    mov a,r4                                 \n"
-             "    clr c                                    \n"
-             "    rrc a                                    \n"
+             "    mov b,#14                                \n"
+             "    div ab                                   \n"
+             "    mov r5,b                                 \n"
+             "    mov b,#3                                 \n"
+             "    mul ab                                   \n"
              "    mov r4,a                                 \n"
-             //"    dec r4                                   \n"
-             //"    dec r4                                   \n"
-             //"    dec r4                                   \n"
-             // TODO: R4 may overflow, disable for now (3us offset may not be an issue?)
-             
-             ";m=m*125;                                    \n"
-             "    mov b, #125                              \n"
+             ";now r4=int(r4/14)*3                         \n"
+             ";r4=r4+reminder*3/14                         \n"
+             "    mov a,r5                                 \n"
+             "    mov b,#3                                 \n"
+             "    mul ab                                   \n"
+             "    mov b,#14                                \n"
+             "    div ab                                   \n"
+             "    add a,r4                                 \n"
+             "    mov r4,a                                 \n"
+   
+             ";m=m*48;                                     \n"
+             "    mov b, #48                               \n"
              "    mov a, r0                                \n"
              "    mul ab                                   \n"
              "    mov r0, a                                \n"
              "    mov r5, b                                \n"
              
-             "    mov b, #125                              \n"
+             "    mov b, #48                               \n"
              "    mov a, r1                                \n"
              "    mul ab                                   \n"
              "    add a, r5                                \n"
@@ -328,7 +331,7 @@ __asm__ (
              "    addc a, b                                \n"
              "    mov r5, a                                \n"
              
-             "    mov b, #125                              \n"
+             "    mov b, #48                               \n"
              "    mov a, r2                                \n"
              "    mul ab                                   \n"
              "    add a, r5                                \n"
@@ -337,26 +340,43 @@ __asm__ (
              "    addc a, b                                \n"
              "    mov r5, a                                \n"
              
-             "    mov b, #125                              \n"
+             "    mov b, #48                               \n"
              "    mov a, r3                                \n"
              "    mul ab                                   \n"
              "    add a, r5                                \n"
              "    mov r3, a                                \n"
+             //5th byte not needed
+             //"    clr a                                    \n"
+             //"    addc a, b                                \n"
+             //"    mov r5, a                                \n"
              
-             ";return m+t                                  \n"
-             "    mov r5, #0                               \n"
+             
+             ";m=m+t                                       \n"
+             "    mov r6, #0                               \n"
              "    mov a, r4                                \n"
              "    add a, r0                                \n"
-             "    mov dpl, a                               \n"
+             "    mov r0, a                                \n"
              "    mov a, r1                                \n"
-             "    addc a, r5                               \n"
-             "    mov dph, a                               \n"
+             "    addc a, r6                               \n"
+             "    mov r1, a                                \n"
              "    mov a, r2                                \n"
-             "    addc a, r5                               \n"
-             "    mov b, a                                 \n"
+             "    addc a, r6                               \n"
+             "    mov r2, a                                \n"
              "    mov a, r3                                \n"
-             "    addc a, r5                               \n"
+             "    addc a, r6                               \n"
+             "    mov r3, a                                \n"
+             //5th byte not needed
+             //"    mov a, r5                                \n"
+             //"    addc a, r6                               \n"
+             //"    mov r5, a                                \n"
              
+             ";return                                      \n"
+
+             "    mov dpl, r0                              \n"
+             "    mov dph, r1                              \n"
+             "    mov b, r2                                \n"
+             "    mov a, r3                                \n"
+
              );
 
 #else
