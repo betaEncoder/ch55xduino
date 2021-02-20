@@ -9,6 +9,12 @@ void USBDeviceEndPointCfg();
 extern __idata volatile uint32_t timer0_overflow_count;
 extern __idata volatile uint8_t timer0_overflow_count_5th_byte;
 
+#if F_CPU == 56000000
+#define T0_CYCLE 224
+#else
+#define T0_CYCLE 250
+#endif
+
 void Timer0Interrupt(void) __interrupt (INT_NO_TMR0) __using(1) //using register bank 1
 {
     /*timer0_overflow_count++;
@@ -76,18 +82,32 @@ uint32_t micros(){
              "incTimer0_overf_cntCopyOver$:                \n"
             );
     
+    //since TL0 (R4) always ranging from (256-T0_CYCLE) to 255, we can reduce R4 by (256-T0_CYCLE)
+    
+#if T0_CYCLE == 250
+    __asm__ ("    clr c                                    \n"
+             "    mov a, r4                                \n"
+             "    subb a,#6                                \n"
+             "    mov r4, a                                \n");
+#elif T0_CYCLE == 224
+    __asm__ ("    clr c                                    \n"
+             "    mov a, r4                                \n"
+             "    subb a,#32                               \n"
+             "    mov r4, a                                \n");
+#endif
+    
 #if F_CPU == 16000000
-    //1m = 250t 1t=0.75us (m*250+t-6)*3/2/2
+    //1m = 250t 1t=0.75us (m*250+t)*3/2/2
     //m in r0~r3
     //t in r4
-    //t=((3*t)>>1)-9);
+    //t=((3*t)>>1);
     //m=(m*375)=m<<8+m*119;
     //return (m+t)>>1
     
     
     __asm__ (
-             ";1m = 250t 1t=0.5us (m*250+t-6)*3/2/2  t is 6~255\n"
-             ";we need to return (m<<8+m*119+((3*t)>>1)-9))>>1 \n"
+             ";1m = 250t 1t=0.5us (m*250+t)*3/2/2  t is 0~249\n"
+             ";we need to return (m<<8+m*119+((3*t)>>1)))>>1 \n"
              
              ";m=m*119;                                    \n"
              "    mov a, r0                                \n"
@@ -158,8 +178,6 @@ uint32_t micros(){
              "    mov a, r4                                \n"
              "    rrc a                                    \n"
              "    mov r4, a                                \n"
-             "    ;sub r4:r6 by 9                          \n"
-            // TODO: R4 may overflow, skip-9 for now (4.5us offset may not be an issue?)
              
              ";get m+t                                     \n"
              "    mov r7, #0                               \n"
@@ -203,9 +221,9 @@ uint32_t micros(){
 #elif F_CPU == 24000000
     //24M CLK
     
-     /*1m = 250t 1t=0.5us (m*250+t-6)/2
+     /*1m = 250t 1t=0.5us (m*250+t)/2
      
-     t=(t>>1)-3;
+     t=(t>>1);
      m=m*125;
      
      return ( m+t );*/
@@ -214,17 +232,13 @@ uint32_t micros(){
     
 
 __asm__ (
-             ";1m = 250t 1t=0.5us (m*250+t-6)/2  t is 6~255\n"
-             ";we need to return m*125+t-3                 \n"
-             ";t=(t>>1)-3;                                 \n"
+             ";1m = 250t 1t=0.5us (m*250+t)/2  t is 0~249\n"
+             ";we need to return m*125+t/2                 \n"
+             ";t=(t>>1);                                   \n"
              "    mov a,r4                                 \n"
              "    clr c                                    \n"
              "    rrc a                                    \n"
              "    mov r4,a                                 \n"
-             //"    dec r4                                   \n"
-             //"    dec r4                                   \n"
-             //"    dec r4                                   \n"
-         // TODO: R4 may overflow, disable for now (3us offset may not be an issue?)
              
              ";m=m*125;                                    \n"
              "    mov b, #125                              \n"
@@ -663,7 +677,7 @@ void init()
     //init T0 for millis
     TMOD = (TMOD & ~0x0F)|(bT0_M1);//mode 2 for autoreload
     T2MOD = T2MOD & ~bT0_CLK;    //bT0_CLK=0;clk Div by 12
-    TH0 = 255-250+1;
+    TH0 = 255-T0_CYCLE+1;
     TF0 = 0;
     ET0 = 1;
     TR0 = 1;
