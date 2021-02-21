@@ -245,14 +245,14 @@ __code uint8_t digital_pin_to_channel_PGM[] = {
     NOT_ANALOG,	//not exist
     NOT_ANALOG, //not exist
 	
-    NOT_ANALOG, //PIN10
-    NOT_ANALOG,
-    NOT_ANALOG,
-    NOT_ANALOG,
-    NOT_ANALOG,
-    NOT_ANALOG,
-    NOT_ANALOG,
-    NOT_ANALOG,
+    0, //PIN10
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
     NOT_ANALOG,	//not exist
     NOT_ANALOG, //not exist
 	

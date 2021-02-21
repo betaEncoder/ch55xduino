@@ -39,6 +39,7 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
             P0_PU &= ~bit;
             P0_DIR &= ~bit;
         }else if (port == P1PORT){
+            P1_IE |= bit;
             PORT_CFG &= ~bP1_OC;
             P1_PU &= ~bit;
             P1_DIR &= ~bit;
@@ -83,6 +84,7 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
             P0_PU |= bit;
             P0_DIR &= ~bit;
         }else if (port == P1PORT){
+            P1_IE |= bit;
             PORT_CFG &= ~bP1_OC;
             P1_PU |= bit;
             P1_DIR &= ~bit;
