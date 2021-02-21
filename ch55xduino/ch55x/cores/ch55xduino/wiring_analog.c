@@ -102,6 +102,58 @@ void analogWrite(uint8_t pin, __xdata uint16_t val)
                 }
         }
     }
+#elif defined(CH559)
+    pinMode(pin, OUTPUT);
+    if (val == 0)
+    {
+        digitalWrite(pin, LOW);
+    }
+    else if (val >= 256)
+    {
+        digitalWrite(pin, HIGH);
+    }
+    else
+    {
+        uint8_t pwmPin = digitalPinToPWM(pin);
+        if (pwmPin!=NOT_ON_PWM){
+#if (F_CPU/(1000L*256))>255
+            PWM_CK_SE = 255;
+#else
+            PWM_CK_SE = (F_CPU/(1000L*256));
+#endif
+            PWM_CYCLE = 255;
+        }
+        switch(pwmPin)
+        {
+            case PIN_PWM1:
+                PIN_FUNC &= ~(bPWM1_PIN_X); //CH559 only has 1 bit for 2 PWMs
+                PWM_CTRL |= bPWM_OUT_EN;
+                PWM_DATA = val;
+                break;
+            case PIN_PWM2:
+                PIN_FUNC &= ~(bPWM1_PIN_X);
+                PWM_CTRL |= bPWM2_OUT_EN;
+                PWM_DATA2 = val;
+                break;
+            case PIN_PWM1_:
+                PIN_FUNC |= (bPWM1_PIN_X);
+                PWM_CTRL |= bPWM_OUT_EN;
+                PWM_DATA = val;
+                break;
+            case PIN_PWM2_:
+                PIN_FUNC |= (bPWM1_PIN_X);
+                PWM_CTRL |= bPWM2_OUT_EN;
+                PWM_DATA2 = val;
+                break;
+            case NOT_ON_PWM:
+            default:
+                if (val < 128) {
+                    digitalWrite(pin, LOW);
+                } else {
+                    digitalWrite(pin, HIGH);
+                }
+        }
+    }
 #else
     return;
 #endif
