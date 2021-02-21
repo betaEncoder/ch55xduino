@@ -33,6 +33,29 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
             P4_DIR_PU &= ~bit;
         }
 #endif
+#if defined(CH559)
+        if (port == P0PORT){
+            PORT_CFG &= ~bP0_OC;
+            P0_PU &= ~bit;
+            P0_DIR &= ~bit;
+        }else if (port == P1PORT){
+            P1_IE |= bit;
+            PORT_CFG &= ~bP1_OC;
+            P1_PU &= ~bit;
+            P1_DIR &= ~bit;
+        }else if (port == P2PORT){
+            PORT_CFG &= ~bP2_OC;
+            P2_PU &= ~bit;
+            P2_DIR &= ~bit;
+        }else if (port == P3PORT){
+            PORT_CFG &= ~bP3_OC;
+            P3_PU &= ~bit;
+            P3_DIR &= ~bit;
+        }else if (port == P4PORT){  //P4 can not do OC
+            P4_PU &= ~bit;
+            P4_DIR &= ~bit;
+        }   //P5 can only do input
+#endif
     } else if (mode == INPUT_PULLUP) {
 #if defined(CH551) || defined(CH552) || defined(CH549)
         if (port == P1PORT){
@@ -54,6 +77,29 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
             P4_MOD_OC |= bit;
             P4_DIR_PU |= bit;
         }
+#endif
+#if defined(CH559)
+        if (port == P0PORT){
+            PORT_CFG &= ~bP0_OC;
+            P0_PU |= bit;
+            P0_DIR &= ~bit;
+        }else if (port == P1PORT){
+            P1_IE |= bit;
+            PORT_CFG &= ~bP1_OC;
+            P1_PU |= bit;
+            P1_DIR &= ~bit;
+        }else if (port == P2PORT){
+            PORT_CFG &= ~bP2_OC;
+            P2_PU |= bit;
+            P2_DIR &= ~bit;
+        }else if (port == P3PORT){
+            PORT_CFG &= ~bP3_OC;
+            P3_PU |= bit;
+            P3_DIR &= ~bit;
+        }else if (port == P4PORT){  //P4 can not do OC
+            P4_PU |= bit;
+            P4_DIR &= ~bit;
+        }   //P5 can only do input
 #endif
     } else if (mode == OUTPUT) {
 #if defined(CH551) || defined(CH552) || defined(CH549)
@@ -77,6 +123,23 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
             P4_DIR_PU |= bit;
         }
 #endif
+#if defined(CH559)
+        if (port == P0PORT){
+            PORT_CFG &= ~bP0_OC;
+            P0_DIR |= bit;
+        }else if (port == P1PORT){
+            PORT_CFG &= ~bP1_OC;
+            P1_DIR |= bit;
+        }else if (port == P2PORT){
+            PORT_CFG &= ~bP2_OC;
+            P2_DIR |= bit;
+        }else if (port == P3PORT){
+            PORT_CFG &= ~bP3_OC;
+            P3_DIR |= bit;
+        }else if (port == P4PORT){  //P4 can not do OC
+            P4_DIR |= bit;
+        }   //P5 can only do input
+#endif
     } else if (mode == OUTPUT_OD) {
 #if defined(CH551) || defined(CH552) || defined(CH549)
         if (port == P1PORT){
@@ -99,6 +162,7 @@ void pinMode(uint8_t pin, __xdata uint8_t mode)    //only P1 & P3 can set mode
             P4_DIR_PU &= ~bit;
         }
 #endif
+        //todo: OC mode for CH559
     }
 }
 
@@ -131,6 +195,7 @@ static void turnOffPWM(uint8_t pwm)
 #else
     return;
 #endif
+    //todo: PWM mode for CH559
 }
 
 uint8_t digitalRead(uint8_t pin)
@@ -148,7 +213,7 @@ uint8_t digitalRead(uint8_t pin)
     uint8_t portBuf = 0;
     
     switch(port){
-#if defined(CH551) || defined(CH552) || defined(CH549)
+#if defined(CH551) || defined(CH552) || defined(CH549) || defined(CH559)
         case P1PORT:
             portBuf = P1;
             break;
@@ -168,6 +233,16 @@ uint8_t digitalRead(uint8_t pin)
             break;
         case P5PORT:
             portBuf = P5;
+            break;
+#elif defined(CH559)
+        case P0PORT:
+            portBuf = P0;
+            break;
+        case P4PORT:
+            portBuf = P4_IN;
+            break;
+        case P5PORT:
+            portBuf = P5_IN;
             break;
 #endif
         default:
@@ -194,7 +269,7 @@ void digitalWrite(uint8_t pin, __xdata uint8_t val)
     EA = 0;
     
     switch(port){
-#if defined(CH551) || defined(CH552) || defined(CH549)
+#if defined(CH551) || defined(CH552) || defined(CH549) || defined(CH559)
         case P1PORT:
             if (val == LOW) {
                 P1 &= ~bit;
@@ -237,6 +312,21 @@ void digitalWrite(uint8_t pin, __xdata uint8_t val)
                 P5 &= ~bit;
             } else {
                 P5 |= bit;
+            }
+            break;
+#elif defined(CH559)
+        case P0PORT:
+            if (val == LOW) {
+                P0 &= ~bit;
+            } else {
+                P0 |= bit;
+            }
+            break;
+        case P4PORT:
+            if (val == LOW) {
+                P4_OUT &= ~bit;
+            } else {
+                P4_OUT |= bit;
             }
             break;
 #endif

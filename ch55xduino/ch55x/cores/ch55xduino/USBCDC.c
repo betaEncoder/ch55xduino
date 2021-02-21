@@ -59,11 +59,21 @@ void setControlLineStateHandler(){
         delayMicroseconds(50000);
         
         __asm__ ("lcall #0x3800");  //Jump to bootloader code
+        
+        while(1);
+#elif defined(CH559) && (BOOT_LOAD_ADDR == 0xF400)
+        USB_CTRL = 0;
+        EA = 0;                     //Disabling all interrupts is required.
+        delayMicroseconds(50000);
+        delayMicroseconds(50000);
+        
+        __asm__ ("lcall #0xF400");  //Jump to bootloader code
+        
+        while(1);
 #elif BOOT_LOAD_ADDR == 0xF400
         //todo: not working well, CH549 doesn't support direct jump
 #endif
         
-        while(1);
     }
     
 }
