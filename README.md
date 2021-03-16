@@ -53,9 +53,9 @@ If you want to leave the bootloader, you may send the following bytes at 57600 b
 
 ### Driver for windows
 
-![Zadig image](https://raw.githubusercontent.com/DeqingSun/ch55xduino/ch55xduino/docs/Zadig_bootloader.png)
+![Zadig image](https://raw.githubusercontent.com/DeqingSun/ch55xduino/ch55xduino/docs/Zadig_bootloader_libusb.png)
 
-[Zadig](https://zadig.akeo.ie/) is the recommended tool to install drivers in Windows. The bootloader (4348,55E0) should be installed with WinUSB or libusb-win32 driver.
+[Zadig](https://zadig.akeo.ie/) is the recommended tool to install drivers in Windows. The bootloader (4348,55E0) should be installed with libusb-win32 driver (WinUSB driver may not work on some computer). 
 
 ![Zadig CDC image](https://raw.githubusercontent.com/DeqingSun/ch55xduino/ch55xduino/docs/Zadig_CDC.png)
 
