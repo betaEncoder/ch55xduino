@@ -53,7 +53,7 @@ __code uint8_t CfgDesc[] ={
     0x05,       //bDescriptorType Endpoint descriptor type
     0x81,       //bEndpointAddress The address of the endpoint on the USB device described by this descriptor(EP1:IN)
     0x03,       //bmAttributes Interrupt
-    0x03,0x00,  //ValuewMaxPacketSize Maximum packet size this endpoint is capable of sending or receiving
+    0x04,0x00,  //ValuewMaxPacketSize Maximum packet size this endpoint is capable of sending or receiving
     0x0A,       //bInterval Interval for polling endpoint for data transfers. Expressed in milliseconds.
 };
 
@@ -79,10 +79,11 @@ __code uint8_t ReportDescriptor[50] = {
     0x05, 0x01,                    //     USAGE_PAGE (Generic Desktop)
     0x09, 0x30,                    //     USAGE (X)
     0x09, 0x31,                    //     USAGE (Y)
+    0x09, 0x38,                    //     USAGE (Wheel)
     0x15, 0x81,                    //     LOGICAL_MINIMUM (-127)
     0x25, 0x7f,                    //     LOGICAL_MAXIMUM (127)
     0x75, 0x08,                    //     REPORT_SIZE (8)
-    0x95, 0x02,                    //     REPORT_COUNT (2)
+    0x95, 0x03,                    //     REPORT_COUNT (3)
     0x81, 0x06,                    //     INPUT (Data,Var,Rel)
     0xc0,                          //   END_COLLECTION
     0xc0                           // END_COLLECTION
