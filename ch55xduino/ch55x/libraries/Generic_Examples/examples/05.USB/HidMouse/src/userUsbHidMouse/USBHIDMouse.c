@@ -22,7 +22,6 @@ void USBInit(){
     USBDeviceIntCfg();                                                    //Interrupt configuration    
     UEP0_T_LEN = 0;
     UEP1_T_LEN = 0;                                                       //Pre-use send length must be cleared	  
-    UEP2_T_LEN = 0;                                                          
 }
 
 
@@ -63,14 +62,12 @@ uint8_t USB_EP1_send(){
 }
 
 uint8_t Mouse_press(uint8_t k) {
-	uint8_t i;
 	HIDRep[0] |= k;
 	USB_EP1_send();
 	return 1;
 }
 
 uint8_t Mouse_release(uint8_t k) {
-	uint8_t i;
 	HIDRep[0] &= ~k;
 
 	USB_EP1_send();
