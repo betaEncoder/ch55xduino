@@ -81,3 +81,9 @@ void Mouse_releaseAll(void){
     HIDRep[0] = 0;
 	USB_EP1_send();
 }
+
+void Mouse_move(int8_t x, int8_t y){
+    HIDRep[1] = x;
+    HIDRep[2] = y;
+	USB_EP1_send();
+}

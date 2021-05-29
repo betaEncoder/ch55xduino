@@ -19,6 +19,7 @@ void USBInit(void);
 uint8_t Mouse_press(uint8_t k);
 uint8_t Mouse_release(uint8_t k);
 void Mouse_releaseAll(void);
+void Mouse_move(int8_t x, int8_t y);
 
 #ifdef __cplusplus
 } // extern "C"

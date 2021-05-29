@@ -60,9 +60,9 @@ void loop() {
   if (button3PressPrev != button3Press) {
     button3PressPrev = button3Press;
     if (button3Press) {
-      Mouse_press(BUTTON_CENTER);
+      Mouse_move(10, 20);
     } else {
-      Mouse_release(BUTTON_CENTER);
+      Mouse_move(0, 0);
     }
   }
 
