@@ -87,3 +87,8 @@ void Mouse_move(int8_t x, int8_t y){
     HIDRep[2] = y;
 	USB_EP1_send();
 }
+
+void Mouse_scroll(int8_t tilt){
+    HIDRep[3] = tilt;
+	USB_EP1_send();
+}
