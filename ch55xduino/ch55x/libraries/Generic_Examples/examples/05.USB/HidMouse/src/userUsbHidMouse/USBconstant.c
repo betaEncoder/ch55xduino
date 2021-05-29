@@ -59,7 +59,7 @@ __code uint8_t CfgDesc[] ={
 
 __code uint16_t ReportDescLen = sizeof(ReportDesc);
 
-__code uint8_t ReportDescriptor[50] = {
+__code uint8_t ReportDesc[] = {
     0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x02,                    // USAGE (Mouse)
     0xa1, 0x01,                    // COLLECTION (Application)
@@ -107,7 +107,7 @@ __code uint8_t Prod_Des[]={                                //Produce String Desc
 __code uint16_t Prod_DesLen = sizeof(Prod_Des);
 
 __code uint8_t Manuf_Des[]={
-    0x0E,0x03,
-    'b',0x00,'e',0x00,'t',0x00,'a',0x00,
+    0x0A,0x03,
+    'b',0x00,'e',0x00,'t',0x00,'a',0x00
 };
 __code uint16_t Manuf_DesLen = sizeof(Manuf_Des);

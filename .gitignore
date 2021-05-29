@@ -32,3 +32,4 @@ site/
 # ignore my scratch directory
 notes/
 .DS_Store
+.vscode

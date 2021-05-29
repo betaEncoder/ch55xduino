@@ -19,6 +19,10 @@
 
 #include "src/userUsbHidMouse/USBHIDMouse.h"
 
+#define BUTTON1_PIN 15
+#define BUTTON2_PIN 16
+#define BUTTON3_PIN 17
+
 bool button1PressPrev = false;
 bool button2PressPrev = false;
 bool button3PressPrev = false;
@@ -34,12 +38,31 @@ void setup() {
 void loop() {
   //button 1 is mapped to left click
   bool button1Press = !digitalRead(BUTTON1_PIN);
+  bool button2Press = !digitalRead(BUTTON2_PIN);
+  bool button3Press = !digitalRead(BUTTON3_PIN);
+  
   if (button1PressPrev != button1Press) {
     button1PressPrev = button1Press;
     if (button1Press) {
       Mouse_press(BUTTON_LEFT);
     } else {
       Mouse_release(BUTTON_LEFT);
+    }
+  }
+  if (button2PressPrev != button2Press) {
+    button2PressPrev = button2Press;
+    if (button2Press) {
+      Mouse_press(BUTTON_RIGHT);
+    } else {
+      Mouse_release(BUTTON_RIGHT);
+    }
+  }
+  if (button3PressPrev != button3Press) {
+    button3PressPrev = button3Press;
+    if (button3Press) {
+      Mouse_press(BUTTON_CENTER);
+    } else {
+      Mouse_release(BUTTON_CENTER);
     }
   }
 

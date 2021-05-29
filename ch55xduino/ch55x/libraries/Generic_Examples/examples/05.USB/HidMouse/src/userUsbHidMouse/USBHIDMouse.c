@@ -69,7 +69,7 @@ uint8_t Mouse_press(uint8_t k) {
 	return 1;
 }
 
-uint8_t Keyboard_release(uint8_t k) {
+uint8_t Mouse_release(uint8_t k) {
 	uint8_t i;
 	HIDRep[0] &= ~k;
 
