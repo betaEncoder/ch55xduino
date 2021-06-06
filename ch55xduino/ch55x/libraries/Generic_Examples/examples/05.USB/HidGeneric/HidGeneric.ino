@@ -1,8 +1,8 @@
 /*
-  HID Keyboard example
+  HID Generic communication example
 
 
-  created 2020
+  created 2021
   by Deqing Sun for use with CH55xduino
 
   This example code is in the public domain.
